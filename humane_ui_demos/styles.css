@@ -1,0 +1,457 @@
+/* =============================== */
+/* Global Page & Container Styling */
+/* =============================== */
+:root {
+  --beamPrimary: #00ffe0;
+  --beamPrimaryRGB: 0, 255, 224;
+  --beamSecondary: rgba(var(--beamPrimaryRGB), 0.75);
+  --beamTertiary: rgba(var(--beamPrimaryRGB), 0.25);
+  --laserPrimary: #32ffe3;
+  --laserSecondary: #1ea390;
+  --laserBlueGreen: #00ffdd;
+
+  /* For magnet offsets */
+  --padding-x: 6px;
+  --padding-y: 6px;
+
+  /* Basic sizing */
+  --inner-radius: 16px;
+  --outer-radius: 24px;
+}
+
+body {
+  margin: 0;
+  background-color: black;
+  font-family: 'Poppins', sans-serif;
+  color: var(--beamPrimary);
+  /* No forced body-wide centering. Each .demo-container will handle that. */
+}
+
+.page-title {
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.demo-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 2rem auto; /* centers horizontally in the page */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+/* For spacing the headings */
+.demo-container > h2 {
+  margin-bottom: 1rem;
+}
+
+/* ======================================= */
+/* 1) Scrollable "projection-area"
+   --------------------------------------- */
+.projection-area {
+  /* By default, some demos override width/height. We'll do min widths instead. */
+  width: 275px;
+  height: 250px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  position: relative; /* needed for absolute positioning of overlays */
+  cursor: none;       /* from your snippet */
+}
+
+.scroll-container {
+  overflow-y: scroll;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  margin-top: -28px;
+  margin-bottom: -28px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+button.cosmos.suggestion {
+  scroll-snap-align: center none;
+}
+
+h3.header {
+  margin: 4px 8px;
+}
+
+/* --- Updated Overlay Action Areas --- */
+.actions-top,
+.actions-bottom {
+  z-index: 500;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  height: 50px;
+}
+
+.actions-top {
+  top: 0;
+  left: 0;
+  background-image: linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0));
+}
+
+.actions-bottom {
+  bottom: 0;
+  left: 0;
+  background-image: linear-gradient(to top, rgba(0,0,0,1), rgba(0,0,0,0));
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+/* ======================================= */
+/* 2) Simple Chat normal-container
+   ---------------------------------- */
+.normal-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: start;
+  margin: 8px;
+  padding: 4px;
+  cursor: none;
+}
+
+.header {
+  margin: 4px;
+  font-size: 24px;
+}
+
+.header .icon {
+  font-size: 30px;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+.card {
+  border: 2px solid var(--beamPrimary);
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 8px 0;
+  margin-bottom: -4px;
+}
+
+.card p {
+  margin: 0;
+  font-size: 48px;
+  font-weight: 600;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+/* ======================================= */
+/* 3) Timer & Alarm overlay
+   ---------------------------------- */
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.spacer {
+  width: 1rem;
+  height: auto;
+}
+
+.time {
+  width: 125px;
+  font-size: 4rem;
+  margin: 0 0.5rem;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.notifications {
+  color: var(--beamSecondary);
+  margin-top: 0.25rem;
+  user-select: none;
+}
+
+button.icon {
+  z-index: 150;
+}
+
+.overlay {
+  z-index: 100;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 275px;
+  height: 250px;
+  background-color: rgba(0, 0, 0, 0.80);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.overlay-text {
+  width: 170px;
+  text-wrap: wrap;
+  text-align: center;
+  font-size: 1.25rem;
+  padding: 0;
+  margin: 0;
+  font-weight: bold;
+}
+
+.overlay-text .primary {
+  margin: -0.75rem 0;
+  font-size: 2.25rem;
+}
+.timer.primary {
+  margin: -1rem 0;
+  font-size: 3rem;
+}
+
+.overlay-text .secondary {
+  margin: 0;
+  font-size: 1.25rem;
+  color: var(--beamSecondary);
+}
+.timer.secondary {
+  font-size: 1.5rem;
+}
+.timer.secondary.name,
+.alarm.secondary.next {
+  font-weight: normal;
+}
+
+.timer-button:hover .overlay,
+.alarm-button:hover .overlay {
+  visibility: visible;
+}
+
+.toggle-container {
+  margin-top: 1rem;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ======================================= */
+/* 4) Demo-Grid Buttons
+   ---------------------------------- */
+.demo-grid {
+  display: flex;
+  flex-wrap: wrap;
+  color: var(--beamPrimary);
+  justify-content: center; /* center all the little containers too */
+}
+
+.list-container {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  margin: 8px;
+  padding: 4px;
+  cursor: none;
+}
+
+.list-container.demo {
+  width: 300px;
+}
+
+/* Lowercase style from your snippet */
+.lc {
+  text-transform: lowercase;
+}
+
+/* ======================================= */
+/* Generic Dividers
+   ---------------------------------- */
+.divider-invisible {
+  width: 100%;
+  height: 8px;
+}
+
+/* ======================================= */
+/* Cosmos Button Base
+   ---------------------------------- */
+button.cosmos {
+  cursor: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Poppins', sans-serif;
+  border: 2px solid var(--beamPrimary);
+  border-radius: 16px;
+  color: var(--beamPrimary);
+  background-color: black;
+  font-size: 20px;
+  padding: 6px 12px;
+  margin: 4px 6px;
+  transition: 0.15s ease-in;
+  text-align: center;
+}
+
+button.cosmos.secondary,
+button.cosmos.secondary:active {
+  border: 2px solid var(--beamTertiary);
+}
+
+button.cosmos.list {
+  border: 2px solid var(--beamTertiary);
+}
+
+button.cosmos.suggestion {
+  border: 2px dashed var(--beamTertiary);
+  padding: 6px 2px;
+  font-size: 18px;
+}
+button.cosmos.suggestion:hover {
+  background-clip: padding-box;
+  border: 2px dashed var(--beamTertiary);
+}
+button.cosmos.list:active,
+button.cosmos.suggestion:active {
+  background-color: var(--beamTertiary);
+}
+
+button.cosmos.accent,
+button.cosmos.accent:active {
+  background-color: var(--beamTertiary);
+  border: 2px solid transparent;
+}
+
+button.cosmos.small {
+  font-size: 16px;
+  padding: 0 12px;
+  border-radius: 10px;
+  transform: scale(1);
+}
+button.cosmos.small:hover {
+  transform: scale(1.1);
+}
+
+button.cosmos.medium {
+  font-size: 18px;
+  padding: 2px 14px;
+  border-radius: 14px;
+  transform: scale(1);
+}
+button.cosmos.medium:hover {
+  transform: scale(1.2);
+}
+
+button.cosmos.icon {
+  height: 50px;
+  border-radius: 25px;
+  font-size: 26px;
+  transform: scale(1);
+}
+button.cosmos.icon.small {
+  max-height: 28px;
+  font-size: 16px;
+  padding: 0;
+}
+button.cosmos.icon.secondary {
+  color: var(--beamSecondary);
+}
+button.cosmos.icon.tertiary {
+  color: var(--beamTertiary);
+}
+button.cosmos.icon.secondary:hover,
+button.cosmos.icon.tertiary:hover {
+  color: black;
+  border: 2px solid var(--beamPrimary);
+}
+button.cosmos.icon.secondary:active,
+button.cosmos.icon.tertiary:active {
+  color: var(--beamPrimary);
+}
+button.cosmos.icon:hover {
+  transform: scale(1.1);
+}
+
+button.cosmos.borderless {
+  border: 2px solid transparent;
+}
+
+button.cosmos.round {
+  border-radius: 25px;
+}
+
+button.cosmos.ui-scroll {
+  max-height: 20px;
+  padding: 0 14px;
+  line-height: 8px;
+}
+button.cosmos.ui-scroll span {
+  transform: scaleX(2);
+  line-height: 16px !important;
+}
+
+button.cosmos:hover {
+  color: black;
+  background-color: var(--beamPrimary);
+}
+button.cosmos:active {
+  color: var(--beamPrimary);
+  background-color: black;
+  border: 2px solid var(--beamPrimary);
+}
+
+/* Interactive text */
+.ui-interactive {
+  transition: all 0.15s;
+  font-weight: normal;
+}
+.ui-interactive:hover {
+  cursor: none;
+  font-weight: bold;
+}
+
+/* ======================================= */
+/* Magnetism
+   ---------------------------------- */
+button {
+  --ease: ease;
+  --speed: 0.1s;
+}
+
+/**
+ * The actual transform, using --magnet-x and --magnet-y
+ * The clamp ensures it never goes beyond [-1..1].
+ */
+:where(button.cosmos) {
+  translate: calc(clamp(-1, var(--magnet-x), 0.95) * var(--padding-x, 1rem))
+             calc(clamp(-1, var(--magnet-y), 0.95) * var(--padding-y, 1rem));
+  transition: translate var(--speed, 0.25s) var(--ease, ease-out),
+              outline-color 0.25s,
+              background-color 0.25s,
+              box-shadow 0.05s,
+              transform 0.3s;
+}
+
+:where(button.cosmos.shadow) {
+  /* Opposite direction for the box shadow offset */
+  box-shadow:
+    calc(0px - (clamp(-1, var(--magnet-x), 1) * var(--padding-x, 1rem)))
+    calc(0px - (clamp(-1, var(--magnet-y), 1) * var(--padding-y, 1rem)))
+    1px -3px var(--beamSecondary);
+}
+
+.list-container h2 {
+  align-self: flex-start; /* Override the container’s centering for the title */
+  width: 100%;
+  text-align: left;
+  margin-bottom: 8px;
+}

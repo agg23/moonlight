@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ai Pin CosmOS UI Demo</title>
+  <!-- Material Icons -->
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded"
+  />
+  <!-- Poppins Font -->
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+  />
+  <!-- Combined CSS -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <h1 class="page-title">Ai Pin CosmOS UI Demo</h1>
+
+  <!-- ======================================== -->
+  <!-- Demo 1: Scrollable Suggestion Buttons     -->
+  <!-- ======================================== -->
+  <section class="demo-container">
+    <h2>Demo 1: Location Scrolling List</h2>
+    <div class="projection-area">
+      <div class="actions-top">
+        <!-- inline "onclick" to preserve original scroll functionality -->
+        <button
+          id="scrollUp"
+          onclick="container.scrollBy(0, -75)"
+          class="cosmos ui-scroll borderless"
+        >
+          <span class="material-symbols-rounded">keyboard_arrow_up</span>
+        </button>
+      </div>
+
+      <div #container id="container" class="list-container scroll-container">
+        <h3 class="header">Location</h3>
+        <button class="cosmos suggestion">What can I do in Location?</button>
+        <button class="cosmos suggestion">Unique experiences in Location?</button>
+        <button class="cosmos suggestion">Nearest coffee shop in Location?</button>
+        <button class="cosmos suggestion">Tell me about the cultural heritage of Location?</button>
+        <div class="divider-invisible"></div>
+      </div>
+
+      <div class="actions-bottom">
+        <button
+          id="scrollDown"
+          onclick="container.scrollBy(0, 75)"
+          class="cosmos ui-scroll borderless"
+        >
+          <span class="material-symbols-rounded">keyboard_arrow_down</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================== -->
+  <!-- Demo 2: Simple "Chat" / normal-container  -->
+  <!-- ======================================== -->
+  <section class="demo-container">
+    <h2>Demo 2: Simple Chat Container</h2>
+    <div class="projection-area normal-container">
+      <p class="header">
+        <span class="icon material-symbols-rounded">chat_bubble</span>
+        to Brittney
+      </p>
+      <div class="card">
+        <p>hello!</p>
+      </div>
+      <div class="button-container">
+        <button class="cosmos small borderless shadow">edit</button>
+        <button class="cosmos small borderless shadow">send</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================== -->
+  <!-- Demo 3: Timer & Alarm Overlay            -->
+  <!-- ======================================== -->
+  <section class="demo-container">
+    <h2>Demo 3: Timer & Alarm Overlay</h2>
+    <div class="projection-area">
+      <button class="cosmos round small accent">nearby</button>
+      <div class="divider-invisible"></div>
+
+      <div class="flex-center">
+        <button class="cosmos icon timer-button secondary borderless shadow">
+          <span class="material-symbols-rounded">av_timer</span>
+        </button>
+        <span class="cosmos flex-center time ui-interactive">10:08</span>
+        <button class="cosmos icon alarm-button secondary borderless shadow">
+          <span class="material-symbols-rounded">alarm</span>
+        </button>
+      </div>
+
+      <div class="divider-invisible"></div>
+      <span class="cosmos flex-center notifications">you're all caught up</span>
+
+      <!-- Overlay that appears on hover -->
+      <div class="overlay hidden">
+        <p class="overlay-text"></p>
+      </div>
+    </div>
+
+    <!-- This container is now centered with everything else -->
+    <div class="normal-container toggle-container">
+      <label>
+        <input type="checkbox" class="timer-toggle"> Timer
+      </label>
+      <div class="spacer"></div>
+      <label>
+        <input type="checkbox" class="alarm-toggle"> Alarm
+      </label>
+    </div>
+  </section>
+
+  <!-- ======================================== -->
+  <!-- Demo 4: Various Buttons (demo-grid)       -->
+  <!-- ======================================== -->
+  <section class="demo-container">
+    <h2>Demo 4: Button Showcases</h2>
+    <div class="demo-grid">
+      <!-- List Buttons -->
+      <div class="list-container demo lc">
+        <h2>List Buttons</h2>
+        <button class="cosmos list lc">List Button</button>
+        <button class="cosmos list lc">List Button</button>
+        <button class="cosmos list lc">List Button</button>
+      </div>
+
+      <!-- Suggested List Buttons -->
+      <div class="list-container lc">
+        <h2>Suggested List Buttons</h2>
+        <button class="cosmos suggestion lc">Suggested List Button</button>
+        <button class="cosmos suggestion lc">Suggested List Button</button>
+        <button class="cosmos suggestion lc">Suggested List Button</button>
+      </div>
+
+      <!-- Borderless List -->
+      <div class="list-container lc">
+        <h2>Borderless List</h2>
+        <button class="cosmos list borderless lc">Borderless List Button</button>
+        <button class="cosmos list borderless lc">Borderless List Button</button>
+        <button class="cosmos list borderless lc">Borderless List Button</button>
+      </div>
+
+      <!-- Large Button Variants -->
+      <div class="list-container demo lc">
+        <h2>Large Button Variants</h2>
+        <button class="cosmos lc">Primary Button</button>
+        <button class="cosmos secondary lc">Secondary Button</button>
+        <button class="cosmos accent lc">Accent Button</button>
+        <button class="cosmos borderless lc">Borderless Text Button</button>
+      </div>
+
+      <!-- Other Button Variants -->
+      <div class="list-container demo lc">
+        <h2>Other Button Variants</h2>
+        <button class="cosmos small borderless shadow">small button</button>
+        <button class="cosmos small borderless shadow">small button</button>
+        <div class="divider-invisible"></div>
+        <button class="cosmos medium shadow">medium button</button>
+        <div class="divider-invisible"></div>
+        <button class="cosmos medium shadow">medium button</button>
+        <div class="divider-invisible"></div>
+        <button class="cosmos round small accent">small round accent</button>
+        <div class="divider-invisible"></div>
+        <span class="cosmos ui-interactive">interactive text</span>
+      </div>
+
+      <!-- Icon Buttons -->
+      <div class="normal-container demo lc">
+        <h2>Icon Buttons</h2>
+        <div class="divider-invisible"></div>
+        <button class="cosmos icon shadow">
+          <span class="material-symbols-rounded">chat_bubble</span>
+        </button>
+        <button class="cosmos icon borderless shadow">
+          <span class="material-symbols-rounded">mood</span>
+        </button>
+        <button class="cosmos icon secondary borderless shadow">
+          <span class="material-symbols-rounded">alarm</span>
+        </button>
+        <button class="cosmos icon tertiary borderless shadow">
+          <span class="material-symbols-rounded">timer</span>
+        </button>
+        <div class="divider-invisible"></div>
+        <button class="cosmos ui-scroll borderless">
+          <span class="material-symbols-rounded">keyboard_arrow_down</span>
+        </button>
+        <button class="cosmos icon small shadow">
+          <span class="material-symbols-rounded">add</span>
+        </button>
+        <div class="divider-invisible"></div>
+        <button class="cosmos medium secondary shadow">
+          &nbsp;&nbsp;<span class="material-symbols-rounded">play_arrow</span>&nbsp;&nbsp;
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Combined JS -->
+  <script src="scripts.js"></script>
+</body>
+</html>
