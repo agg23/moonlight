@@ -13,10 +13,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,35 +29,14 @@ import com.open.pin.ui.components.button.ButtonEffect
 import com.open.pin.ui.debug.VoronoiVisualizer
 import com.open.pin.ui.utils.modifiers.SnapManager
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.open.pin.ui.theme.PinColors
 import com.open.pin.ui.components.button.PinButton
-import com.open.pin.ui.components.button.PinCircularButton
 import com.open.pin.ui.components.views.ListView
-import com.open.pin.ui.components.views.ListViewOrientation
-import com.open.pin.ui.components.views.PolyItemPlacement
-import com.open.pin.ui.components.views.PolyView
-import com.open.pin.ui.components.views.PolyViewParams
-import com.open.pin.ui.components.views.RadialView
-import com.open.pin.ui.components.views.RadialViewParams
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -127,7 +102,6 @@ fun FullScreenContent() {
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(16.dp)
                 .size(24.dp)  // Small size
                 .background(
                     color = if (showVisualizer) PinColors.primary else PinColors.tertiary,
@@ -149,261 +123,114 @@ fun FullScreenContent() {
 
 @Composable
 fun PinUiDemo() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = PinTheme.colors.background)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    // Simple settings demo with just the buttons we want to test
+    MenuDemo()
+}
+
+@Composable
+private fun MenuDemo() {
+    val buttonEffect = remember {
+        ButtonEffect(
+            enableMagnetic = true,
+            enableSnap = true,
+            snapWeight = 1.2f
+        )
+    }
+    
+    ListView(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        leftIndent = 0.dp,      // No ListView indents
+        rightIndent = 0.dp,
+        itemSpacing = 16.dp,
+        showScrollButtons = true,
+        autoHideButtons = true
     ) {
-        // Common effect for all buttons
-        val buttonEffect = remember {
-            ButtonEffect(
-                enableMagnetic = true,
-                enableSnap = true,
-                snapWeight = 1.2f
-            )
-        }
-        
-        ViewHeading("settings")
-        
-        // Vertical ListView Demo
-        ListView(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            spacing = 12.dp,
-            modifier = Modifier.padding(horizontal = 8.dp)
+        Column(
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            PinButton(
-                text = "List Item 1",
-                onClick = { /* Handle click */ },
-                style = ButtonStyle.List,
-                effect = buttonEffect
-            )
+            ViewHeading(title = "Demo", centered = false)  // Edge-to-edge heading
             
-            PinButton(
-                text = "List Item 2",
-                onClick = { /* Handle click */ },
-                style = ButtonStyle.List,
-                effect = buttonEffect
-            )
-            
-            PinButton(
-                text = "List Item 3",
-                onClick = { /* Handle click */ },
-                style = ButtonStyle.List,
-                effect = buttonEffect
-            )
-        }
-        
-        Divider(Modifier.padding(vertical = 8.dp))
-        
-        ViewHeading("Horizontal")
-        
-        // Horizontal ListView Demo
-        ListView(
-            orientation = ListViewOrientation.HORIZONTAL,
-            spacing = 12.dp,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            PinCircularButton(
-                onClick = { /* Handle click */ },
-                icon = Icons.Default.Home,
-                size = 60.dp,
-                effect = buttonEffect
-            )
-            
-            PinCircularButton(
-                onClick = { /* Handle click */ },
-                icon = Icons.Default.Search,
-                size = 60.dp,
-                effect = buttonEffect
-            )
-            
-            PinCircularButton(
-                onClick = { /* Handle click */ },
-                icon = Icons.Default.Settings,
-                size = 60.dp,
-                effect = buttonEffect
-            )
-        }
-        
-        Divider()
-        
-        ViewHeading("RadialView")
-        
-        // RadialView Demo
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            RadialView(
-                params = RadialViewParams(
-                    radius = 120.dp,
-                    startAngle = 0f,
-                    sweepAngle = 360f
+            Column(
+                modifier = Modifier.padding(
+                    start = 12.dp,    // Manual indent for buttons only
+                    end = 36.dp       // Space for scroll button
                 ),
-                modifier = Modifier,
-                {
-                    PinCircularButton(
-                        onClick = { /* Handle click */ },
-                        icon = Icons.Default.Add,
-                        size = 70.dp,
-                        effect = buttonEffect
-                    )
-                },
-                {
-                    PinCircularButton(
-                        onClick = { /* Handle click */ },
-                        icon = Icons.Default.Edit,
-                        size = 70.dp,
-                        effect = buttonEffect
-                    )
-                },
-                {
-                    PinCircularButton(
-                        onClick = { /* Handle click */ },
-                        icon = Icons.Default.Delete,
-                        size = 70.dp,
-                        effect = buttonEffect
-                    )
-                },
-                {
-                    PinCircularButton(
-                        onClick = { /* Handle click */ },
-                        icon = Icons.Default.Check,
-                        size = 70.dp,
-                        effect = buttonEffect
-                    )
-                },
-                {
-                    PinCircularButton(
-                        onClick = { /* Handle click */ },
-                        icon = Icons.Default.Close,
-                        size = 70.dp,
-                        effect = buttonEffect
-                    )
-                }
-            )
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                PinButton(
+                    text = "Item1",
+                    onClick = { /* Handle click */ },
+                    style = ButtonStyle.List,
+                    effect = buttonEffect
+                )
+                
+                PinButton(
+                    text = "Item2",
+                    onClick = { /* Handle click */ },
+                    style = ButtonStyle.List,
+                    effect = buttonEffect
+                )
+                
+                PinButton(
+                    text = "Item3",
+                    onClick = { /* Handle click */ },
+                    style = ButtonStyle.List,
+                    effect = buttonEffect
+                )
+
+                PinButton(
+                    text = "Item4",
+                    onClick = { /* Handle click */ },
+                    style = ButtonStyle.List,
+                    effect = buttonEffect
+                )
+
+                PinButton(
+                    text = "Item5",
+                    onClick = { /* Handle click */ },
+                    style = ButtonStyle.List,
+                    effect = buttonEffect
+                )
+
+                PinButton(
+                    text = "Item6",
+                    onClick = { /* Handle click */ },
+                    style = ButtonStyle.List,
+                    effect = buttonEffect
+                )
+
+                PinButton(
+                    text = "Item7",
+                    onClick = { /* Handle click */ },
+                    style = ButtonStyle.List,
+                    effect = buttonEffect
+                )
+
+                PinButton(
+                    text = "Item8",
+                    onClick = { /* Handle click */ },
+                    style = ButtonStyle.List,
+                    effect = buttonEffect
+                )
+
+                PinButton(
+                    text = "Item9",
+                    onClick = { /* Handle click */ },
+                    style = ButtonStyle.List,
+                    effect = buttonEffect
+                )
+            }
         }
-        
-        Divider(Modifier.padding(vertical = 8.dp))
-        
-        ViewHeading("Triangle")
-        
-        // PolyView Demo - Triangle
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(250.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            PolyView(
-                params = PolyViewParams(
-                    sides = 3,
-                    radius = 120.dp,
-                    rotation = 0f
-                ),
-                modifier = Modifier,
-                {
-                    PinCircularButton(
-                        onClick = { /* Handle click */ },
-                        icon = Icons.Default.Close,
-                        size = 70.dp,
-                        effect = buttonEffect
-                    )
-                },
-                {
-                    PinCircularButton(
-                        onClick = { /* Handle click */ },
-                        icon = Icons.Default.Close,
-                        size = 70.dp,
-                        effect = buttonEffect
-                    )
-                },
-                {
-                    PinCircularButton(
-                        onClick = { /* Handle click */ },
-                        icon = Icons.Default.Close,
-                        size = 70.dp,
-                        effect = buttonEffect
-                    )
-                }
-            )
-        }
-        
-        Divider(Modifier.padding(vertical = 8.dp))
-        
-        ViewHeading("capture")
-        
-        // PolyView Demo - Pentagon with edge placement
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            PolyView(
-                params = PolyViewParams(
-                    sides = 5,
-                    radius = 150.dp,
-                    rotation = 0f,
-                    itemPlacement = PolyItemPlacement.EDGES
-                ),
-                modifier = Modifier,
-                {
-                    PinCircularButton(
-                        onClick = { /* Handle click */ },
-                        icon = Icons.AutoMirrored.Filled.ArrowForward,
-                        size = 120.dp,
-                        effect = buttonEffect
-                    )
-                },
-                {
-                    PinCircularButton(
-                        onClick = { /* Handle click */ },
-                        icon = Icons.AutoMirrored.Filled.ArrowBack,
-                        size = 120.dp,
-                        effect = buttonEffect
-                    )
-                },
-                {
-                    PinCircularButton(
-                        onClick = { /* Handle click */ },
-                        icon = Icons.AutoMirrored.Filled.ExitToApp,
-                        size = 120.dp,
-                        effect = buttonEffect
-                    )
-                },
-                {
-                    PinCircularButton(
-                        onClick = { /* Handle click */ },
-                        icon = Icons.Default.Settings,
-                        size = 120.dp,
-                        effect = buttonEffect
-                    )
-                },
-                {
-                    PinCircularButton(
-                        onClick = { /* Handle click */ },
-                        icon = Icons.Default.Search,
-                        size = 120.dp,
-                        effect = buttonEffect
-                    )
-                }
-            )
-        }
-        
-        Spacer(modifier = Modifier.height(50.dp))
     }
 }
 
 @Composable
-private fun ViewHeading(title: String, centered: Boolean = false, modifier: Modifier = Modifier) {
+private fun ViewHeading(modifier: Modifier = Modifier, title: String, centered: Boolean = false) {
     Box(
-        modifier = modifier
+        modifier = modifier,
+        contentAlignment = if (centered) Alignment.Center else Alignment.CenterStart
     ) {
         Text(
             text = title,

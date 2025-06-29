@@ -13,20 +13,36 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.IntOffset
 import com.open.pin.ui.utils.PinDimensions
 import kotlin.math.roundToInt
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 
 /**
- * Applies a magnetic effect that makes the component move towards the pointer
+ * Applies a magnetic effect that makes the component move towards the pointer.
+ * Coordinates with SnapManager to maintain selection state until a new element is selected.
  */
 @SuppressLint("ReturnFromAwaitPointerEventScope")
 fun Modifier.magneticEffect(
     enabled: Boolean = true,
     maxOffset: Int = PinDimensions.paddingVerticalSmall.value.toInt(),
     sensitivity: Float = 1.5f,
+    elementId: String? = null,
     onHoverChanged: ((Boolean) -> Unit)? = null
 ) = composed {
     var buttonOffset by remember { mutableStateOf(IntOffset(0, 0)) }
     var isPointerInBounds by remember { mutableStateOf(false) }
     var isPressed by remember { mutableStateOf(false) }
+    
+    // Track globally active element for persistence
+    val activeElementId by SnapManager.activeElementId.collectAsState()
+    val isGloballyActive = elementId != null && activeElementId == elementId
+    
+    // Reset magnetic state when this element is no longer globally active
+    LaunchedEffect(isGloballyActive) {
+        if (!isGloballyActive && !isPointerInBounds) {
+            buttonOffset = IntOffset(0, 0)
+            onHoverChanged?.invoke(false)
+        }
+    }
 
     if (!enabled) {
         return@composed this
@@ -50,9 +66,10 @@ fun Modifier.magneticEffect(
                             val position = event.changes.first().position
                             
                             // Check if pointer is still within the bounds of this element
+                            // Account for magnetic displacement to prevent feedback loop
                             val wasInBounds = isPointerInBounds
-                            isPointerInBounds = position.x >= 0 && position.x <= size.width &&
-                                    position.y >= 0 && position.y <= size.height
+                            isPointerInBounds = position.x >= -buttonOffset.x && position.x <= size.width - buttonOffset.x &&
+                                    position.y >= -buttonOffset.y && position.y <= size.height - buttonOffset.y
                             
                             if (isPointerInBounds) {
                                 // Calculate center of the component
@@ -65,22 +82,28 @@ fun Modifier.magneticEffect(
                                 
                                 buttonOffset = IntOffset(offsetX, offsetY)
                             } else {
-                                // Reset position if moved outside bounds - do this always for magnet effect
-                                buttonOffset = IntOffset(0, 0)
+                                // Only reset position if this element is no longer globally active
+                                if (!isGloballyActive) {
+                                    buttonOffset = IntOffset(0, 0)
+                                }
                                 
-                                // But only update hover state if not pressing
-                                if (!isPressed && wasInBounds) {
+                                // But only update hover state if not pressing and not globally active
+                                if (!isPressed && wasInBounds && !isGloballyActive) {
                                     onHoverChanged?.invoke(false)
                                 }
                             }
                         }
                         PointerEventType.Exit -> {
-                            // Reset position when pointer leaves
+                            // Mark as no longer in bounds
                             isPointerInBounds = false
-                            buttonOffset = IntOffset(0, 0)
                             
-                            // Only update hover state if not pressing
-                            if (!isPressed) {
+                            // Only reset position if this element is no longer globally active
+                            if (!isGloballyActive) {
+                                buttonOffset = IntOffset(0, 0)
+                            }
+                            
+                            // Only update hover state if not pressing and not globally active
+                            if (!isPressed && !isGloballyActive) {
                                 onHoverChanged?.invoke(false)
                             }
                         }

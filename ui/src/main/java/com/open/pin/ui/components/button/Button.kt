@@ -73,8 +73,8 @@ enum class ButtonTextStyle { BodyLarge, TitleLarge, BodyMedium, LabelLarge }
  * @property animationSpec Animation specification for interactive effects
  */
 data class ButtonEffect(
-    val enableMagnetic: Boolean = false,
-    val enableSnap: Boolean = false,
+    val enableMagnetic: Boolean = true,
+    val enableSnap: Boolean = true,
     val hoverFill: ButtonHoverFill = ButtonHoverFill.Full,
     val snapWeight: Float = 1f,
     val animationSpec: AnimationSpec<Float> = spring(stiffness = Spring.StiffnessLow)
@@ -310,7 +310,10 @@ fun PinButtonBase(
         )
         .then(
             if (effect.enableMagnetic && enabled) {
-                Modifier.magneticEffect(enabled = true) { interaction.isHovered = it }
+                Modifier.magneticEffect(
+                    enabled = true,
+                    elementId = snapId
+                ) { interaction.isHovered = it }
             } else Modifier
         )
         .then(
@@ -447,7 +450,7 @@ fun PinCircularButton(
     onClick: () -> Unit,
     icon: ImageVector,
     contentDescription: String? = null,
-    size: Dp = 100.dp,
+    size: Dp = 120.dp,
     effect: ButtonEffect = ButtonEffect(),
     enabled: Boolean = true
 ) {
