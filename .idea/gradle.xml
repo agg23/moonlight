@@ -14,13 +14,6 @@
             <option value="$PROJECT_DIR$/ui" />
           </set>
         </option>
-        <option name="resolveExternalAnnotations" value="false" />
-      </GradleProjectSettings>
-      <GradleProjectSettings>
-        <option name="testRunner" value="CHOOSE_PER_TEST" />
-        <option name="externalProjectPath" value="$USER_HOME$/Documents/github/PenumbraOS/sdk" />
-        <option name="gradleJvm" value="temurin-17" />
-        <option name="resolveExternalAnnotations" value="false" />
       </GradleProjectSettings>
     </option>
   </component>
