@@ -62,6 +62,7 @@ private object ScrollButtonUtils {
         )
     }
     
+    
 }
 
 /**
@@ -197,10 +198,10 @@ fun PinCompactScrollButton(
 ) {
     val buttonInteraction = interaction ?: rememberAnimatedInteractionState()
     
-    // Use shared animation utilities with compact-specific values
+    // Use shared animation utilities with scale-in effect
     val scale by ScrollButtonUtils.animatedScale(
         isHovered = buttonInteraction.effectiveHovered,
-        targetScale = 1.15f  // Slightly less scale for compact buttons
+        targetScale = 1.3f  // More pronounced scale for "scale in" effect
     )
     
     val icon = ScrollButtonUtils.getIconForDirection(direction)

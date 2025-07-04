@@ -12,8 +12,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.open.pin.ui.scroll.ConfigurableScrollPhysics
 import com.open.pin.ui.scroll.ScrollBehavior
 import com.open.pin.ui.scroll.ScrollBehaviorConfig
+import com.open.pin.ui.scroll.ScrollBehaviorPresets
 import com.open.pin.ui.scroll.ScrollConfig
 import com.open.pin.ui.scroll.SimpleScrollBehavior
 import com.open.pin.ui.scroll.rememberScrollBehaviorState
@@ -43,6 +45,9 @@ enum class ListViewOrientation {
  * @param scrollAmount Amount to scroll per button press in dp
  * @param autoHideButtons Whether to auto-hide scroll buttons at boundaries
  * @param enableSnapToCenter Whether to enable snap-to-center behavior
+ * @param scrollDampingRatio Controls scroll animation bounciness (0.0f = very bouncy, 1.0f = no bounce)
+ * @param scrollStiffness Controls scroll animation speed (higher = faster, lower = slower)
+ * @param scrollBehaviorConfig Optional custom scroll behavior configuration (overrides damping/stiffness if provided)
  * @param listState Optional LazyListState for external scroll control
  * @param content The composable content to arrange
  */
@@ -61,6 +66,9 @@ fun ListView(
     scrollAmount: Dp = PinScrollDimensions.baseScrollAmount,
     autoHideButtons: Boolean = true,
     enableSnapToCenter: Boolean = false,
+    scrollDampingRatio: Float = androidx.compose.animation.core.Spring.DampingRatioNoBouncy,
+    scrollStiffness: Float = androidx.compose.animation.core.Spring.StiffnessLow,
+    scrollBehaviorConfig: ScrollBehaviorConfig? = null,
     listState: LazyListState = rememberLazyListState(),
     content: @Composable () -> Unit
 ) {
@@ -69,11 +77,20 @@ fun ListView(
         rememberSnapFlingBehavior(lazyListState = listState)
     } else null
     
-    // Configure scroll behavior
-    val scrollConfig = ScrollBehaviorConfig(
+    // Configure scroll behavior with custom animation parameters
+    val scrollConfig = scrollBehaviorConfig ?: ScrollBehaviorPresets.customScroll(
+        dampingRatio = scrollDampingRatio,
+        stiffness = scrollStiffness,
         showScrollButtons = showScrollButtons,
-        autoHideButtons = autoHideButtons,
-        scrollConfig = ScrollConfig(baseScrollAmount = scrollAmount)
+        autoHideButtons = autoHideButtons
+    ).copy(
+        scrollConfig = ScrollConfig(
+            baseScrollAmount = scrollAmount,
+            physics = ConfigurableScrollPhysics(
+                dampingRatio = scrollDampingRatio,
+                stiffness = scrollStiffness
+            )
+        )
     )
     
     // Use clean scroll behavior system
@@ -214,11 +231,12 @@ private fun VerticalLazyColumn(
     gradientHeight: Dp = 0.dp,
     content: @Composable () -> Unit
 ) {
+    // Don't add gradient height to content padding - the gradient overlays on top
     val adjustedPadding = PaddingValues(
         start = contentPadding.calculateStartPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
         end = contentPadding.calculateEndPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
-        top = contentPadding.calculateTopPadding() + gradientHeight,
-        bottom = contentPadding.calculateBottomPadding() + gradientHeight
+        top = contentPadding.calculateTopPadding(),
+        bottom = contentPadding.calculateBottomPadding()
     )
 
     if (snapFlingBehavior != null) {

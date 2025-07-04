@@ -221,14 +221,34 @@ class ScrollMomentumState {
     }
     
     /**
-     * Get appropriate animation spec based on current momentum
+     * Get appropriate animation spec based on current momentum with smooth acceleration curves
      */
     fun getAnimationSpec(): AnimationSpec<Float> {
         return when (momentumLevel) {
-            0, 1 -> PinAnimationSpecs.Scroll.snap
-            in 2..3 -> PinAnimationSpecs.Scroll.momentum
-            else -> PinAnimationSpecs.Scroll.windUp
+            0 -> PinAnimationSpecs.Scroll.snap  // Initial precise movement
+            1 -> PinAnimationSpecs.Builders.smoothScrollSpring(  // Start wind-up
+                dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
+                stiffness = androidx.compose.animation.core.Spring.StiffnessMedium
+            )
+            in 2..3 -> PinAnimationSpecs.Builders.smoothScrollSpring(  // Building momentum
+                dampingRatio = androidx.compose.animation.core.Spring.DampingRatioLowBouncy,
+                stiffness = androidx.compose.animation.core.Spring.StiffnessHigh
+            )
+            else -> PinAnimationSpecs.Builders.windUpSpring(  // Full momentum with smooth deceleration
+                dampingRatio = androidx.compose.animation.core.Spring.DampingRatioLowBouncy,
+                stiffness = androidx.compose.animation.core.Spring.StiffnessHigh
+            )
         }
+    }
+    
+    /**
+     * Get smooth wind-down animation for momentum decay
+     */
+    fun getWindDownAnimationSpec(): AnimationSpec<Float> {
+        return PinAnimationSpecs.Builders.smoothScrollSpring(
+            dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy,
+            stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow
+        )
     }
     
     /**

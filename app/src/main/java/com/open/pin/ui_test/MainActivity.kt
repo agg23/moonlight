@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import com.open.pin.ui.theme.PinColors
 import com.open.pin.ui.components.button.PinButton
 import com.open.pin.ui.components.views.ListView
+import com.open.pin.ui.scroll.ScrollBehaviorPresets
 
 class MainActivity : ComponentActivity() {
     private lateinit var snapCoordinator: SnapCoordinator
@@ -151,7 +152,8 @@ private fun MenuDemo() {
         rightIndent = 0.dp,
         itemSpacing = 16.dp,
         showScrollButtons = true,
-        autoHideButtons = true
+        autoHideButtons = true,
+        scrollBehaviorConfig = ScrollBehaviorPresets.pinDefault()
     ) {
         Column(
             horizontalAlignment = Alignment.Start,

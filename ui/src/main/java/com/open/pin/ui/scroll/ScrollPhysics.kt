@@ -1,6 +1,7 @@
 package com.open.pin.ui.scroll
 
 import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.Spring
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.*
@@ -108,11 +109,55 @@ class SmoothScrollPhysics : ScrollPhysics {
 }
 
 /**
+ * Configurable scroll physics with custom damping and stiffness
+ */
+class ConfigurableScrollPhysics(
+    private val dampingRatio: Float = Spring.DampingRatioNoBouncy,
+    private val stiffness: Float = Spring.StiffnessMedium,
+    private val smoothingFactor: Float = 0.85f
+) : ScrollPhysics {
+    
+    override fun calculateScrollDistance(
+        baseAmount: Float, 
+        momentumState: ScrollMomentumState
+    ): Float {
+        val multiplier = momentumState.getScrollMultiplier()
+        return baseAmount * (1f + (multiplier - 1f) * smoothingFactor)
+    }
+    
+    override fun getScrollAnimation(momentumState: ScrollMomentumState): AnimationSpec<Float> {
+        // Use custom spring animation with specified damping and stiffness
+        return PinAnimationSpecs.Builders.customSpring(
+            dampingRatio = dampingRatio,
+            stiffness = stiffness
+        )
+    }
+    
+    override suspend fun performScroll(
+        listState: LazyListState,
+        direction: Int,
+        baseAmount: Float,
+        momentumState: ScrollMomentumState
+    ) {
+        val scrollDistance = calculateScrollDistance(baseAmount, momentumState)
+        val animationSpec = getScrollAnimation(momentumState)
+        
+        listState.animateScrollBy(
+            value = direction * scrollDistance,
+            animationSpec = animationSpec
+        )
+    }
+}
+
+/**
  * Configuration for scroll behavior
  */
 data class ScrollConfig(
     val baseScrollAmount: Dp,
-    val physics: ScrollPhysics = PinScrollPhysics(),
+    val physics: ScrollPhysics = ConfigurableScrollPhysics(
+        dampingRatio = Spring.DampingRatioNoBouncy,
+        stiffness = Spring.StiffnessLow
+    ),
     val enableMomentum: Boolean = true,
     val autoHideButtons: Boolean = true
 )

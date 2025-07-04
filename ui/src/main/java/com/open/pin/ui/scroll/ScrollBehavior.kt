@@ -1,6 +1,7 @@
 package com.open.pin.ui.scroll
 
 import androidx.compose.foundation.background
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.*
@@ -12,6 +13,7 @@ import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.zIndex
+import com.open.pin.ui.animation.PinAnimationSpecs
 import com.open.pin.ui.animation.rememberAnimatedInteractionState
 import com.open.pin.ui.components.button.PinCompactScrollUpButton
 import com.open.pin.ui.components.button.PinCompactScrollDownButton
@@ -27,7 +29,11 @@ data class ScrollBehaviorConfig(
     val autoHideButtons: Boolean = true,
     val gradientHeight: Dp = PinScrollDimensions.gradientOverlayHeight,
     val scrollConfig: ScrollConfig = ScrollConfig(
-        baseScrollAmount = PinScrollDimensions.baseScrollAmount
+        baseScrollAmount = PinScrollDimensions.baseScrollAmount,
+        physics = ConfigurableScrollPhysics(
+            dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy,
+            stiffness = androidx.compose.animation.core.Spring.StiffnessLow
+        )
     )
 )
 
@@ -237,12 +243,24 @@ private fun ScrollArea(
             .zIndex(1f),
         contentAlignment = Alignment.Center
     ) {
-        // Scroll button
+        // Smooth alpha animation for icon visibility transitions
+        val targetAlpha = if (interactionState.effectiveHovered) {
+            PinAnimationSpecs.Config.SCROLL_ICON_HOVER_ALPHA
+        } else {
+            PinAnimationSpecs.Config.SCROLL_ICON_BASE_ALPHA
+        }
+        
+        val buttonAlpha by animateFloatAsState(
+            targetValue = targetAlpha,
+            animationSpec = PinAnimationSpecs.Interaction.hover,
+            label = "scroll_icon_alpha"
+        )
+        
         when (direction) {
             ScrollDirection.UP -> {
                 PinCompactScrollUpButton(
                     onClick = onScroll,
-                    modifier = Modifier.alpha(if (interactionState.effectiveHovered) 1f else 0f),
+                    modifier = Modifier.alpha(buttonAlpha),
                     interaction = rememberAnimatedInteractionState().apply {
                         isHovered = interactionState.isHovered
                     }
@@ -251,7 +269,7 @@ private fun ScrollArea(
             ScrollDirection.DOWN -> {
                 PinCompactScrollDownButton(
                     onClick = onScroll,
-                    modifier = Modifier.alpha(if (interactionState.effectiveHovered) 1f else 0f),
+                    modifier = Modifier.alpha(buttonAlpha),
                     interaction = rememberAnimatedInteractionState().apply {
                         isHovered = interactionState.isHovered
                     }
@@ -314,10 +332,7 @@ object ScrollBehaviorPresets {
         autoHideButtons = true
     )
     
-    fun standard() = ScrollBehaviorConfig(
-        showScrollButtons = true,
-        autoHideButtons = true
-    )
+    fun standard() = pinDefault()
     
     fun alwaysVisible() = ScrollBehaviorConfig(
         showScrollButtons = true,
@@ -331,5 +346,46 @@ object ScrollBehaviorPresets {
             baseScrollAmount = PinScrollDimensions.baseScrollAmount,
             physics = SmoothScrollPhysics()
         )
+    )
+    
+    /**
+     * Create custom scroll behavior with adjustable damping and stiffness
+     * 
+     * @param dampingRatio Controls bounciness (0.0f = very bouncy, 1.0f = no bounce)
+     * @param stiffness Controls speed (higher = faster, lower = slower)
+     * @param showScrollButtons Whether to show scroll buttons
+     * @param autoHideButtons Whether to auto-hide buttons at boundaries
+     */
+    fun customScroll(
+        dampingRatio: Float = androidx.compose.animation.core.Spring.DampingRatioNoBouncy,
+        stiffness: Float = androidx.compose.animation.core.Spring.StiffnessMedium,
+        showScrollButtons: Boolean = true,
+        autoHideButtons: Boolean = true
+    ) = ScrollBehaviorConfig(
+        showScrollButtons = showScrollButtons,
+        autoHideButtons = autoHideButtons,
+        scrollConfig = ScrollConfig(
+            baseScrollAmount = PinScrollDimensions.baseScrollAmount,
+            physics = ConfigurableScrollPhysics(
+                dampingRatio = dampingRatio,
+                stiffness = stiffness
+            )
+        )
+    )
+
+    /**
+     * default pin scroll behavior
+     */
+    fun pinDefault() = customScroll(
+        dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy,
+        stiffness = androidx.compose.animation.core.Spring.StiffnessLow
+    )
+    
+    /**
+     * Bouncy scroll behavior
+     */
+    fun bouncy() = customScroll(
+        dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
+        stiffness = androidx.compose.animation.core.Spring.StiffnessLow
     )
 }

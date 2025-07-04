@@ -182,6 +182,71 @@ object PinAnimationSpecs {
         const val SPRING_STIFFNESS_LOW = Spring.StiffnessLow
         const val SPRING_STIFFNESS_MEDIUM = Spring.StiffnessMedium
         const val SPRING_STIFFNESS_HIGH = Spring.StiffnessHigh
+        
+        // Scroll icons visibility
+        const val SCROLL_ICON_BASE_ALPHA = 0.3f  // Always visible when scrollable
+        const val SCROLL_ICON_HOVER_ALPHA = 1.0f // Full opacity on hover
+    }
+    
+    /**
+     * Builder functions for creating configurable animations with custom parameters
+     */
+    object Builders {
+        
+        /**
+         * Create a custom spring animation with adjustable stiffness and damping
+         */
+        fun customSpring(
+            dampingRatio: Float = Spring.DampingRatioNoBouncy,
+            stiffness: Float = Spring.StiffnessMedium
+        ): AnimationSpec<Float> = spring(
+            dampingRatio = dampingRatio,
+            stiffness = stiffness
+        )
+        
+        /**
+         * Create a custom tween animation with adjustable duration and easing
+         */
+        fun customTween(
+            durationMs: Int = Duration.STANDARD,
+            easing: Easing = FastOutSlowInEasing
+        ): AnimationSpec<Float> = tween(
+            durationMillis = durationMs,
+            easing = easing
+        )
+        
+        /**
+         * Smooth scroll physics spring with configurable responsiveness
+         */
+        fun smoothScrollSpring(
+            dampingRatio: Float = Spring.DampingRatioNoBouncy,
+            stiffness: Float = Spring.StiffnessMedium
+        ): AnimationSpec<Float> = spring(
+            dampingRatio = dampingRatio,
+            stiffness = stiffness
+        )
+        
+        /**
+         * Wind-up/wind-down scroll animation with configurable bounce
+         */
+        fun windUpSpring(
+            dampingRatio: Float = Spring.DampingRatioLowBouncy,
+            stiffness: Float = Spring.StiffnessHigh
+        ): AnimationSpec<Float> = spring(
+            dampingRatio = dampingRatio,
+            stiffness = stiffness
+        )
+        
+        /**
+         * Magnetic attraction animation with configurable responsiveness
+         */
+        fun magneticSpring(
+            dampingRatio: Float = Spring.DampingRatioNoBouncy,
+            stiffness: Float = Spring.StiffnessHigh
+        ): AnimationSpec<Float> = spring(
+            dampingRatio = dampingRatio,
+            stiffness = stiffness
+        )
     }
 }
 
