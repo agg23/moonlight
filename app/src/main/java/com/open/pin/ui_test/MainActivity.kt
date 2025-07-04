@@ -27,7 +27,8 @@ import com.open.pin.ui.PinTheme
 import com.open.pin.ui.components.button.ButtonStyle
 import com.open.pin.ui.components.button.ButtonEffect
 import com.open.pin.ui.debug.VoronoiVisualizer
-import com.open.pin.ui.utils.modifiers.SnapManager
+import com.open.pin.ui.utils.modifiers.ProvideSnapCoordinator
+import com.open.pin.ui.utils.modifiers.SnapCoordinator
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -39,16 +40,23 @@ import com.open.pin.ui.components.button.PinButton
 import com.open.pin.ui.components.views.ListView
 
 class MainActivity : ComponentActivity() {
+    private lateinit var snapCoordinator: SnapCoordinator
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         // Make the activity full screen by hiding the system bars
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
+        // Create snap coordinator for touch event handling
+        snapCoordinator = SnapCoordinator()
+
         // Set content first
         setContent {
             PinTheme {
-                FullScreenContent()
+                ProvideSnapCoordinator(coordinator = snapCoordinator) {
+                    FullScreenContent()
+                }
             }
         }
 
@@ -58,14 +66,14 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // Update event dispatchers to use our SnapManager
+    // Update event dispatchers to use our SnapCoordinator
     override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
-        event?.let { SnapManager.processTouchEvent(it) }
+        event?.let { snapCoordinator.processTouchEvent(it) }
         return super.dispatchTouchEvent(event)
     }
 
     override fun dispatchGenericMotionEvent(event: MotionEvent?): Boolean {
-        event?.let { SnapManager.processMotionEvent(it) }
+        event?.let { snapCoordinator.processMotionEvent(it) }
         return super.dispatchGenericMotionEvent(event)
     }
 

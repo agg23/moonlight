@@ -1,10 +1,8 @@
 package com.open.pin.ui.components.button
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.spring
+import androidx.compose.runtime.State
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -18,8 +16,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import com.open.pin.ui.animation.PinAnimationSpecs
+import com.open.pin.ui.animation.rememberAnimatedInteractionState
 import com.open.pin.ui.utils.PinDimensions
 import com.open.pin.ui.theme.PinScrollDimensions
 
@@ -28,6 +29,39 @@ import com.open.pin.ui.theme.PinScrollDimensions
  */
 enum class ScrollDirection {
     UP, DOWN
+}
+
+/**
+ * Shared utilities for scroll button implementation
+ */
+private object ScrollButtonUtils {
+    
+    fun getIconForDirection(direction: ScrollDirection): ImageVector {
+        return when (direction) {
+            ScrollDirection.UP -> Icons.Default.KeyboardArrowUp
+            ScrollDirection.DOWN -> Icons.Default.KeyboardArrowDown
+        }
+    }
+    
+    fun getContentDescription(direction: ScrollDirection, custom: String?): String {
+        return custom ?: when (direction) {
+            ScrollDirection.UP -> "Scroll up"
+            ScrollDirection.DOWN -> "Scroll down"
+        }
+    }
+    
+    @Composable
+    fun animatedScale(
+        isHovered: Boolean,
+        targetScale: Float = 1.2f
+    ): State<Float> {
+        return animateFloatAsState(
+            targetValue = if (isHovered) targetScale else 1f,
+            animationSpec = PinAnimationSpecs.Interaction.hover,
+            label = "scroll_button_scale"
+        )
+    }
+    
 }
 
 /**
@@ -53,24 +87,16 @@ fun PinScrollButton(
     ),
     contentDescription: String? = null
 ) {
-    val interaction = remember { ButtonInteractionState() }
+    val interaction = rememberAnimatedInteractionState()
     
-    // Animate scale based on hover state (matching web reference behavior)
-    val scale by animateFloatAsState(
-        targetValue = if (interaction.effectiveHovered) 1.2f else 1f,
-        animationSpec = spring(dampingRatio = 0.6f, stiffness = 300f),
-        label = "scroll_button_scale"
+    // Use shared animation utilities
+    val scale by ScrollButtonUtils.animatedScale(
+        isHovered = interaction.effectiveHovered,
+        targetScale = 1.2f
     )
     
-    val icon: ImageVector = when (direction) {
-        ScrollDirection.UP -> Icons.Default.KeyboardArrowUp
-        ScrollDirection.DOWN -> Icons.Default.KeyboardArrowDown
-    }
-    
-    val description = contentDescription ?: when (direction) {
-        ScrollDirection.UP -> "Scroll up"
-        ScrollDirection.DOWN -> "Scroll down"
-    }
+    val icon = ScrollButtonUtils.getIconForDirection(direction)
+    val description = ScrollButtonUtils.getContentDescription(direction, contentDescription)
     
     PinButtonBase(
         modifier = modifier.scale(scale),
@@ -147,6 +173,7 @@ fun PinScrollDownButton(
 /**
  * Compact scroll button designed for overlay use, matching Humane AI demo styling.
  * Features ultra-minimal size with horizontal icon stretching and smooth scaling on hover.
+ * Magnetic and snap effects work properly without position-based animations.
  *
  * @param direction Direction of the scroll (UP or DOWN)
  * @param onClick Action to perform when clicked
@@ -166,41 +193,22 @@ fun PinCompactScrollButton(
         enableSnap = true
     ),
     contentDescription: String? = null,
-    interaction: ButtonInteractionState? = null
+    interaction: com.open.pin.ui.animation.AnimatedInteractionState? = null
 ) {
-    val buttonInteraction = interaction ?: remember { ButtonInteractionState() }
+    val buttonInteraction = interaction ?: rememberAnimatedInteractionState()
     
-    // Animate scale based on hover state (matching HTML demo behavior)
-    val scale by animateFloatAsState(
-        targetValue = if (buttonInteraction.effectiveHovered) 1.15f else 1f,
-        animationSpec = spring(dampingRatio = 0.7f, stiffness = 400f),
-        label = "compact_scroll_button_scale"
+    // Use shared animation utilities with compact-specific values
+    val scale by ScrollButtonUtils.animatedScale(
+        isHovered = buttonInteraction.effectiveHovered,
+        targetScale = 1.15f  // Slightly less scale for compact buttons
     )
     
-    // Peek-out animation: buttons emerge from edges when hovered
-    val peekOffset by animateDpAsState(
-        targetValue = if (buttonInteraction.effectiveHovered) 0.dp else when (direction) {
-            ScrollDirection.UP -> (-20).dp    // Tucked up into top edge
-            ScrollDirection.DOWN -> 20.dp     // Tucked down into bottom edge
-        },
-        animationSpec = spring(dampingRatio = 0.8f, stiffness = 300f),
-        label = "compact_scroll_button_peek"
-    )
-    
-    val icon: ImageVector = when (direction) {
-        ScrollDirection.UP -> Icons.Default.KeyboardArrowUp
-        ScrollDirection.DOWN -> Icons.Default.KeyboardArrowDown
-    }
-    
-    val description = contentDescription ?: when (direction) {
-        ScrollDirection.UP -> "Scroll up"
-        ScrollDirection.DOWN -> "Scroll down"
-    }
+    val icon = ScrollButtonUtils.getIconForDirection(direction)
+    val description = ScrollButtonUtils.getContentDescription(direction, contentDescription)
     
     PinButtonBase(
         modifier = modifier
-            .scale(scale)
-            .offset(y = peekOffset),
+            .scale(scale),
         interaction = buttonInteraction,
         enabled = enabled,
         style = ButtonStyle.Borderless,
@@ -242,10 +250,10 @@ fun PinCompactScrollUpButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     effect: ButtonEffect = ButtonEffect(
-        enableMagnetic = true,  // Disabled to prevent conflict with peek-out animation
+        enableMagnetic = true,
         enableSnap = true
     ),
-    interaction: ButtonInteractionState? = null
+    interaction: com.open.pin.ui.animation.AnimatedInteractionState? = null
 ) {
     PinCompactScrollButton(
         direction = ScrollDirection.UP,
@@ -266,10 +274,10 @@ fun PinCompactScrollDownButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     effect: ButtonEffect = ButtonEffect(
-        enableMagnetic = true,  // Disabled to prevent conflict with peek-out animation
+        enableMagnetic = true,
         enableSnap = true
     ),
-    interaction: ButtonInteractionState? = null
+    interaction: com.open.pin.ui.animation.AnimatedInteractionState? = null
 ) {
     PinCompactScrollButton(
         direction = ScrollDirection.DOWN,

@@ -48,6 +48,8 @@ dependencies {
     implementation(libs.androidx.ui.text.google.fonts)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.runtime.android)
+    implementation(libs.androidx.animation.android)
+    implementation(libs.androidx.lifecycle.viewmodel.android)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

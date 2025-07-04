@@ -10,7 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import com.open.pin.ui.utils.modifiers.SnapManager
+import com.open.pin.ui.utils.VoronoiCalculations
+import com.open.pin.ui.utils.modifiers.rememberSnapCoordinator
 
 /**
  * A debug tool that visualizes the Voronoi/Power diagram regions of snappable elements.
@@ -22,9 +23,10 @@ fun VoronoiVisualizer(
     alpha: Float = 0.3f,
     alphaSelected: Float = 0.8f
 ) {
-    val elements by SnapManager.elements.collectAsState()
-    val activeId by SnapManager.activeElementId.collectAsState()
-    val cursorPosition by SnapManager.cursorPosition.collectAsState()
+    val coordinator = rememberSnapCoordinator()
+    val elements by coordinator.elements.collectAsState()
+    val activeId by coordinator.activeElementId.collectAsState()
+    val cursorPosition by coordinator.cursorPosition.collectAsState()
     
     Box(modifier = modifier.fillMaxSize()) {
         Canvas(modifier = Modifier.fillMaxSize()) {
@@ -35,32 +37,37 @@ fun VoronoiVisualizer(
                 Color.Yellow, Color.Cyan, Color.Magenta
             )
             
-            for (x in 0 until size.width.toInt() step stepSize) {
-                for (y in 0 until size.height.toInt() step stepSize) {
-                    val point = Offset(x.toFloat(), y.toFloat())
-                    val closestElement = elements.minByOrNull { element ->
-                        val distanceSquared = calculateDistanceSquared(point, element.center)
-                        distanceSquared / element.weight
+            // Use efficient grid calculation from pure functions
+            val voronoiGrid = VoronoiCalculations.calculateVoronoiGrid(
+                width = size.width.toInt(),
+                height = size.height.toInt(), 
+                stepSize = stepSize,
+                elements = elements
+            )
+            
+            // Render the grid
+            voronoiGrid.forEach { (coordinate, elementId) ->
+                val (x, y) = coordinate
+                
+                // Find the element by ID for color mapping
+                val element = elements.find { it.id == elementId }
+                
+                element?.let {
+                    // Get color based on element ID
+                    val colorIndex = it.id.hashCode().rem(colors.size).let { hash -> 
+                        if (hash < 0) hash + colors.size else hash 
                     }
+                    val color = colors[colorIndex]
                     
-                    // Draw a dot with the color corresponding to the element
-                    closestElement?.let { element ->
-                        // Get color based on element ID
-                        val colorIndex = element.id.hashCode().rem(colors.size).let { 
-                            if (it < 0) it + colors.size else it 
-                        }
-                        val color = colors[colorIndex]
-                        
-                        // Highlight active region
-                        val isActive = element.id == activeId
-                        val finalColor = if (isActive) color.copy(alpha = alphaSelected) else color.copy(alpha = alpha)
-                        
-                        drawRect(
-                            color = finalColor,
-                            topLeft = Offset(x.toFloat(), y.toFloat()),
-                            size = Size(stepSize.toFloat(), stepSize.toFloat())
-                        )
-                    }
+                    // Highlight active region
+                    val isActive = it.id == activeId
+                    val finalColor = if (isActive) color.copy(alpha = alphaSelected) else color.copy(alpha = alpha)
+                    
+                    drawRect(
+                        color = finalColor,
+                        topLeft = Offset(x.toFloat(), y.toFloat()),
+                        size = Size(stepSize.toFloat(), stepSize.toFloat())
+                    )
                 }
             }
             
@@ -74,8 +81,4 @@ fun VoronoiVisualizer(
     }
 }
 
-private fun calculateDistanceSquared(a: Offset, b: Offset): Float {
-    val dx = a.x - b.x
-    val dy = a.y - b.y
-    return dx * dx + dy * dy
-} 
+ 

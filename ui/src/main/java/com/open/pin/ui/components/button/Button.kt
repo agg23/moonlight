@@ -11,12 +11,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.open.pin.ui.animation.PinAnimationSpecs
+import com.open.pin.ui.animation.rememberAnimatedInteractionState
 import com.open.pin.ui.theme.*
 import com.open.pin.ui.utils.PinDimensions
 import com.open.pin.ui.utils.modifiers.dashedBorder
@@ -77,25 +80,10 @@ data class ButtonEffect(
     val enableSnap: Boolean = true,
     val hoverFill: ButtonHoverFill = ButtonHoverFill.Full,
     val snapWeight: Float = 1f,
-    val animationSpec: AnimationSpec<Float> = spring(stiffness = Spring.StiffnessLow)
+    val animationSpec: AnimationSpec<Float> = PinAnimationSpecs.Interaction.hover
 )
 
 
-/**
- * Manages and tracks the interaction state of a Pin button.
- * 
- * Holds state for hover and snap interactions, making it possible
- * to derive effective visual states based on multiple inputs.
- * 
- * @property isHovered Whether the button is currently being hovered
- * @property isSnapped Whether the button is currently snapped to by the cursor
- * @property effectiveHovered Whether the button should display hover effects (true if either hovered or snapped)
- */
-class ButtonInteractionState {
-    var isHovered by mutableStateOf(false)
-    var isSnapped by mutableStateOf(false)
-    val effectiveHovered: Boolean get() = isHovered || isSnapped
-}
 
 
 /**
@@ -168,7 +156,7 @@ fun rememberButtonStyleData(
     borderStyle: ButtonBorderStyle,
     borderThickness: Dp,
     textStyle: ButtonTextStyle,
-    interaction: ButtonInteractionState,
+    interaction: com.open.pin.ui.animation.AnimatedInteractionState,
     effect: ButtonEffect
 ): ButtonStyleData {
     val buttonTextStyle = remember(textStyle) {
@@ -180,16 +168,24 @@ fun rememberButtonStyleData(
         }
     }
 
+    val hoverProgress by interaction.animatedHoverProgress()
+    
     val containerColor by remember {
         derivedStateOf {
             when {
                 !enabled -> Precomputed.Transparent
-                interaction.effectiveHovered -> when (effect.hoverFill) {
-                    ButtonHoverFill.Full -> Precomputed.PrimaryButtonColor
-                    ButtonHoverFill.Partial -> Precomputed.HoverPartialColor
+                else -> {
+                    val baseColor = when (style) {
+                        ButtonStyle.Accent -> PinColors.tertiary
+                        else -> Precomputed.Transparent
+                    }
+                    val hoverColor = when (effect.hoverFill) {
+                        ButtonHoverFill.Full -> Precomputed.PrimaryButtonColor
+                        ButtonHoverFill.Partial -> Precomputed.HoverPartialColor
+                    }
+                    // Smooth interpolation instead of binary switching
+                    lerp(baseColor, hoverColor, hoverProgress)
                 }
-                style == ButtonStyle.Accent -> PinColors.tertiary
-                else -> Precomputed.Transparent
             }
         }
     }
@@ -198,7 +194,10 @@ fun rememberButtonStyleData(
         derivedStateOf {
             when {
                 !enabled -> Precomputed.DisabledContentColor
-                interaction.effectiveHovered && effect.hoverFill == ButtonHoverFill.Full -> LaserOff
+                effect.hoverFill == ButtonHoverFill.Full -> {
+                    // Smooth interpolation for full hover fill
+                    lerp(Precomputed.PrimaryButtonColor, LaserOff, hoverProgress)
+                }
                 else -> Precomputed.PrimaryButtonColor
             }
         }
@@ -281,7 +280,7 @@ data class PinButtonShapeConfig(
 @Composable
 fun PinButtonBase(
     modifier: Modifier = Modifier,
-    interaction: ButtonInteractionState = remember { ButtonInteractionState() },
+    interaction: com.open.pin.ui.animation.AnimatedInteractionState = rememberAnimatedInteractionState(),
     enabled: Boolean = true,
     borderStyle: ButtonBorderStyle = ButtonBorderStyle.Solid,
     borderThickness: Dp = PinDimensions.borderThickness,
@@ -343,7 +342,14 @@ fun PinButtonBase(
             onClick = onClick, 
             modifier = finalModifier, 
             enabled = enabled, 
-            colors = styleData.colors, 
+            colors = styleData.colors,
+            elevation = ButtonDefaults.buttonElevation(
+                defaultElevation = 0.dp,
+                pressedElevation = 0.dp,
+                disabledElevation = 0.dp,
+                hoveredElevation = 0.dp,
+                focusedElevation = 0.dp
+            ),
             interactionSource = interactionSource,
             border = styleData.border, 
             shape = shapeConfig.shape, 
@@ -354,7 +360,14 @@ fun PinButtonBase(
             onClick = onClick, 
             modifier = finalModifier, 
             enabled = enabled, 
-            colors = styleData.colors, 
+            colors = styleData.colors,
+            elevation = ButtonDefaults.buttonElevation(
+                defaultElevation = 0.dp,
+                pressedElevation = 0.dp,
+                disabledElevation = 0.dp,
+                hoveredElevation = 0.dp,
+                focusedElevation = 0.dp
+            ),
             interactionSource = interactionSource,
             border = styleData.border, 
             shape = shapeConfig.shape, 
@@ -399,7 +412,7 @@ fun PinButton(
     effect: ButtonEffect = ButtonEffect(),
     snapId: String? = null
 ) {
-    val interaction = remember { ButtonInteractionState() }
+    val interaction = rememberAnimatedInteractionState()
 
     PinButtonBase(
         modifier = modifier,
