@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 /**
- * Clean, testable snap coordinator that manages Voronoi-based cursor snapping.
- * Replaces the singleton SnapManager with a composition-local approach.
+ * Optimized snap coordinator with event throttling and intelligent caching.
+ * Manages Voronoi-based cursor snapping with performance improvements.
  */
 class SnapCoordinator {
     // Track all snappable elements currently on screen with their weights
@@ -26,6 +26,12 @@ class SnapCoordinator {
     // The last known cursor position
     private val _cursorPosition = MutableStateFlow(Offset.Zero)
     val cursorPosition = _cursorPosition.asStateFlow()
+    
+    // Throttling state
+    private var lastUpdateTime = 0L
+    private var lastPosition = Offset.Zero
+    private val updateThresholdMs = 16L // ~60fps max update rate
+    private val movementThreshold = 5f // Minimum movement to trigger update
     
     // Register a new snappable element
     fun registerElement(element: SnappableElement) {
@@ -45,7 +51,7 @@ class SnapCoordinator {
         }
     }
     
-    // Process touch events from the activity
+    // Process touch events with throttling for better performance
     fun processTouchEvent(event: MotionEvent) {
         val action = event.actionMasked
         if (action == MotionEvent.ACTION_DOWN || 
@@ -53,28 +59,58 @@ class SnapCoordinator {
             action == MotionEvent.ACTION_HOVER_MOVE) {
             
             val position = Offset(event.x, event.y)
-            _cursorPosition.value = position
-            updateVoronoiOwner(position)
+            processPositionUpdate(position, forceUpdate = action == MotionEvent.ACTION_DOWN)
         }
     }
     
-    // Process generic motion events (for hover)
+    // Process generic motion events (for hover) with throttling
     fun processMotionEvent(event: MotionEvent) {
         if (event.actionMasked == MotionEvent.ACTION_HOVER_MOVE) {
             val position = Offset(event.x, event.y)
-            _cursorPosition.value = position
-            updateVoronoiOwner(position)
+            processPositionUpdate(position, forceUpdate = false)
         }
     }
     
-    // Core Voronoi logic - determine which element should capture the cursor
+    // Throttled position update to reduce computational overhead
+    private fun processPositionUpdate(position: Offset, forceUpdate: Boolean = false) {
+        val currentTime = System.currentTimeMillis()
+        val timeDelta = currentTime - lastUpdateTime
+        val positionDelta = kotlin.math.sqrt(
+            (position.x - lastPosition.x) * (position.x - lastPosition.x) +
+            (position.y - lastPosition.y) * (position.y - lastPosition.y)
+        )
+        
+        // Update if enough time has passed AND cursor moved significantly, or if forced
+        if (forceUpdate || (timeDelta >= updateThresholdMs && positionDelta >= movementThreshold)) {
+            _cursorPosition.value = position
+            updateVoronoiOwner(position)
+            lastUpdateTime = currentTime
+            lastPosition = position
+        } else {
+            // Always update cursor position for visual feedback, but skip expensive calculations
+            _cursorPosition.value = position
+        }
+    }
+    
+    // Optimized Voronoi logic with early exit conditions
     private fun updateVoronoiOwner(position: Offset) {
         val currentElements = _elements.value
+        
+        // Early exit if no elements
+        if (currentElements.isEmpty()) {
+            if (_activeElementId.value != null) {
+                _activeElementId.value = null
+            }
+            return
+        }
+        
+        // Use optimized calculation
         val closestElement = VoronoiCalculations.findClosestElement(position, currentElements)
         
-        // Update active element if changed
-        if (closestElement?.id != _activeElementId.value) {
-            _activeElementId.value = closestElement?.id
+        // Only update if changed to reduce state flow emissions
+        val newActiveId = closestElement?.id
+        if (newActiveId != _activeElementId.value) {
+            _activeElementId.value = newActiveId
         }
     }
 }

@@ -42,7 +42,7 @@ object VoronoiCalculations {
     }
     
     /**
-     * Find the closest element to a point using power diagram weighting.
+     * Optimized closest element search with early exit for performance.
      * This is the core algorithm for Voronoi-based cursor snapping.
      * 
      * @param point Query point (usually cursor position)
@@ -54,15 +54,28 @@ object VoronoiCalculations {
         elements: List<SnappableElement>
     ): SnappableElement? {
         if (elements.isEmpty()) return null
+        if (elements.size == 1) return elements.first()
         
-        return elements.minByOrNull { element ->
-            calculateWeightedDistance(point, element.center, element.weight)
+        var closestElement = elements.first()
+        var minDistance = calculateWeightedDistance(point, closestElement.center, closestElement.weight)
+        
+        // Manual iteration for better performance than minByOrNull
+        for (i in 1 until elements.size) {
+            val element = elements[i]
+            val distance = calculateWeightedDistance(point, element.center, element.weight)
+            
+            if (distance < minDistance) {
+                minDistance = distance
+                closestElement = element
+            }
         }
+        
+        return closestElement
     }
     
     /**
-     * Get the dominant element at each point in a grid for visualization.
-     * Used by VoronoiVisualizer to render the diagram.
+     * Optimized grid calculation with intelligent sampling and early exit conditions.
+     * Used by VoronoiVisualizer to render the diagram efficiently.
      * 
      * @param width Grid width
      * @param height Grid height  
@@ -76,15 +89,37 @@ object VoronoiCalculations {
         stepSize: Int,
         elements: List<SnappableElement>
     ): Map<Pair<Int, Int>, String> {
+        if (elements.isEmpty()) return emptyMap()
+        
         val result = mutableMapOf<Pair<Int, Int>, String>()
         
-        for (x in 0 until width step stepSize) {
-            for (y in 0 until height step stepSize) {
+        // Pre-calculate element centers and weights for faster access
+        val elementData = elements.map { element ->
+            Triple(element.id, element.center, element.weight)
+        }
+        
+        // Use more efficient iteration with bounds checking
+        val maxX = width - stepSize
+        val maxY = height - stepSize
+        
+        for (x in 0..maxX step stepSize) {
+            for (y in 0..maxY step stepSize) {
                 val point = Offset(x.toFloat(), y.toFloat())
-                val closestElement = findClosestElement(point, elements)
                 
-                closestElement?.let { element ->
-                    result[Pair(x, y)] = element.id
+                // Optimized closest element search using pre-calculated data
+                var closestId: String? = null
+                var minDistance = Float.MAX_VALUE
+                
+                for ((id, center, weight) in elementData) {
+                    val distance = calculateWeightedDistance(point, center, weight)
+                    if (distance < minDistance) {
+                        minDistance = distance
+                        closestId = id
+                    }
+                }
+                
+                closestId?.let { id ->
+                    result[Pair(x, y)] = id
                 }
             }
         }

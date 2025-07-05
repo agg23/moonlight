@@ -102,14 +102,16 @@ class AnimatedInteractionState {
 }
 
 /**
- * Magnetic interaction state for components with magnetic effects
+ * Optimized magnetic interaction state with memoized configuration
  */
 @Composable
 fun rememberMagneticInteractionState(
     elementId: String? = null,
     resetDelayMs: Long = PinAnimationSpecs.Config.SCROLL_MOMENTUM_DECAY_MS
 ): MagneticInteractionState {
-    return remember(elementId) { MagneticInteractionState(elementId, resetDelayMs) }
+    return remember(elementId, resetDelayMs) { 
+        MagneticInteractionState(elementId, resetDelayMs) 
+    }
 }
 
 class MagneticInteractionState(
@@ -186,7 +188,7 @@ class MagneticInteractionState(
 }
 
 /**
- * Scroll momentum state for clean scroll physics management
+ * Optimized scroll momentum state with pre-computed constants
  */
 @Composable
 fun rememberScrollMomentumState(): ScrollMomentumState {
@@ -197,7 +199,8 @@ class ScrollMomentumState {
     private var lastScrollTime by mutableStateOf(0L)
     private var momentumLevel by mutableStateOf(0)
     
-    private val momentumMultipliers = listOf(1.0f, 1.2f, 1.5f, 2.0f, 2.5f, 3.0f)
+    // Pre-computed constants to avoid repeated array creation
+    private val momentumMultipliers = floatArrayOf(1.0f, 1.2f, 1.5f, 2.0f, 2.5f, 3.0f)
     private val maxMomentumLevel = PinAnimationSpecs.Config.SCROLL_MOMENTUM_MAX_LEVEL
     private val momentumDecayMs = PinAnimationSpecs.Config.SCROLL_MOMENTUM_DECAY_MS
     
@@ -217,7 +220,11 @@ class ScrollMomentumState {
         momentumLevel = (momentumLevel + 1).coerceAtMost(maxMomentumLevel)
         lastScrollTime = currentTime
         
-        return momentumMultipliers.getOrElse(momentumLevel) { momentumMultipliers.last() }
+        return if (momentumLevel < momentumMultipliers.size) {
+            momentumMultipliers[momentumLevel]
+        } else {
+            momentumMultipliers[momentumMultipliers.size - 1]
+        }
     }
     
     /**

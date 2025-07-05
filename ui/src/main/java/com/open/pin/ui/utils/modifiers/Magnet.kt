@@ -20,8 +20,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
 
 /**
- * Applies a magnetic effect that makes the component move towards the pointer.
- * Uses shared interaction logic and coordinates with SnapCoordinator.
+ * Optimized magnetic effect with reduced computational overhead.
+ * Uses cached calculations and intelligent movement thresholds.
  */
 @SuppressLint("ReturnFromAwaitPointerEventScope")
 @Composable
@@ -35,9 +35,10 @@ fun Modifier.magneticEffect(
     // Hysteresis margin to prevent rapid in/out boundary switching
     val boundaryMargin = 8f
     
-    // Movement smoothing parameters
-    val damping = 0.7f // Interpolation factor for smooth movement (0.0 = no movement, 1.0 = instant)
-    val movementThreshold = 2f // Minimum mouse movement required to trigger position update
+    // Optimized movement parameters
+    val damping = 0.7f // Interpolation factor for smooth movement
+    val movementThreshold = 8f // Increased threshold to reduce update frequency
+    val updateThrottleMs = 16L // Limit updates to ~60fps
     
     // Use shared interaction element state
     val interactionState = rememberInteractionElementState(
@@ -50,6 +51,12 @@ fun Modifier.magneticEffect(
     var lastMousePosition by remember { mutableStateOf(Offset.Zero) } // Track last position for threshold
     var isPointerInBounds by remember { mutableStateOf(false) }
     var isPressed by remember { mutableStateOf(false) }
+    var lastUpdateTime by remember { mutableStateOf(0L) }
+    
+    // Pre-calculate expensive values
+    val maxOffsetFloat by remember(maxOffset, sensitivity) { 
+        mutableStateOf(maxOffset * sensitivity) 
+    }
     
     // Track globally active element for persistence
     val isGloballyActive = interactionState.isSnapped
@@ -97,40 +104,50 @@ fun Modifier.magneticEffect(
                             
                             // Skip magnetic positioning when pressed to eliminate jitter
                             if (isPointerInBounds && !isPressed) {
-                                // Check if mouse has moved enough to warrant position update
-                                val deltaX = position.x - lastMousePosition.x
-                                val deltaY = position.y - lastMousePosition.y
-                                val movementDistance = sqrt(deltaX * deltaX + deltaY * deltaY)
+                                val currentTime = System.currentTimeMillis()
                                 
-                                if (movementDistance >= movementThreshold) {
-                                    lastMousePosition = position
+                                // Throttle updates for better performance
+                                if (currentTime - lastUpdateTime >= updateThrottleMs) {
+                                    // Check if mouse has moved enough to warrant position update
+                                    val deltaX = position.x - lastMousePosition.x
+                                    val deltaY = position.y - lastMousePosition.y
+                                    val movementDistanceSquared = deltaX * deltaX + deltaY * deltaY
                                     
-                                    // Calculate center of the component
-                                    val centerX = size.width / 2f
-                                    val centerY = size.height / 2f
-                                    
-                                    // Calculate target offset from center
-                                    val newTargetX = (position.x - centerX) / centerX * maxOffset * sensitivity
-                                    val newTargetY = (position.y - centerY) / centerY * maxOffset * sensitivity
-                                    
-                                    // Smooth interpolation toward target position
-                                    val currentTarget = targetOffset
-                                    targetOffset = Offset(
-                                        x = currentTarget.x + (newTargetX - currentTarget.x) * damping,
-                                        y = currentTarget.y + (newTargetY - currentTarget.y) * damping
-                                    )
-                                    
-                                    // Only update buttonOffset if change is significant (reduces recomposition)
-                                    val newButtonOffset = IntOffset(targetOffset.x.roundToInt(), targetOffset.y.roundToInt())
-                                    if (newButtonOffset != buttonOffset) {
-                                        buttonOffset = newButtonOffset
+                                    // Use squared distance to avoid expensive sqrt calculation
+                                    if (movementDistanceSquared >= movementThreshold * movementThreshold) {
+                                        lastMousePosition = position
+                                        lastUpdateTime = currentTime
+                                        
+                                        // Pre-calculate center values
+                                        val centerX = size.width * 0.5f
+                                        val centerY = size.height * 0.5f
+                                        
+                                        // Optimized offset calculation
+                                        val normalizedX = (position.x - centerX) / centerX
+                                        val normalizedY = (position.y - centerY) / centerY
+                                        
+                                        val newTargetX = normalizedX * maxOffsetFloat
+                                        val newTargetY = normalizedY * maxOffsetFloat
+                                        
+                                        // Smooth interpolation toward target position
+                                        val currentTarget = targetOffset
+                                        targetOffset = Offset(
+                                            x = currentTarget.x + (newTargetX - currentTarget.x) * damping,
+                                            y = currentTarget.y + (newTargetY - currentTarget.y) * damping
+                                        )
+                                        
+                                        // Only update buttonOffset if change is significant
+                                        val newButtonOffset = IntOffset(targetOffset.x.roundToInt(), targetOffset.y.roundToInt())
+                                        if (newButtonOffset != buttonOffset) {
+                                            buttonOffset = newButtonOffset
+                                        }
                                     }
                                 }
                             } else {
                                 // Only reset position if this element is no longer globally active
-                                if (!isGloballyActive) {
+                                if (!isGloballyActive && (targetOffset != Offset.Zero || buttonOffset != IntOffset.Zero)) {
                                     targetOffset = Offset.Zero
-                                    buttonOffset = IntOffset(0, 0)
+                                    buttonOffset = IntOffset.Zero
                                 }
                                 
                                 // But only update hover state if not pressing and not globally active

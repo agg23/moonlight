@@ -261,18 +261,14 @@ private fun ScrollArea(
                 PinCompactScrollUpButton(
                     onClick = onScroll,
                     modifier = Modifier.alpha(buttonAlpha),
-                    interaction = rememberAnimatedInteractionState().apply {
-                        isHovered = interactionState.isHovered
-                    }
+                    interaction = interactionState // Reuse existing interaction state
                 )
             }
             ScrollDirection.DOWN -> {
                 PinCompactScrollDownButton(
                     onClick = onScroll,
                     modifier = Modifier.alpha(buttonAlpha),
-                    interaction = rememberAnimatedInteractionState().apply {
-                        isHovered = interactionState.isHovered
-                    }
+                    interaction = interactionState // Reuse existing interaction state
                 )
             }
         }

@@ -72,26 +72,33 @@ fun ListView(
     listState: LazyListState = rememberLazyListState(),
     content: @Composable () -> Unit
 ) {
-    // Snap fling behavior for center alignment (only when enabled)
+    // Lazy initialization of snap behavior to avoid unnecessary object creation
     val snapFlingBehavior = if (enableSnapToCenter) {
         rememberSnapFlingBehavior(lazyListState = listState)
-    } else null
+    } else {
+        null
+    }
     
-    // Configure scroll behavior with custom animation parameters
-    val scrollConfig = scrollBehaviorConfig ?: ScrollBehaviorPresets.customScroll(
-        dampingRatio = scrollDampingRatio,
-        stiffness = scrollStiffness,
-        showScrollButtons = showScrollButtons,
-        autoHideButtons = autoHideButtons
-    ).copy(
-        scrollConfig = ScrollConfig(
-            baseScrollAmount = scrollAmount,
-            physics = ConfigurableScrollPhysics(
-                dampingRatio = scrollDampingRatio,
-                stiffness = scrollStiffness
+    // Optimize scroll config creation with memoization
+    val scrollConfig = remember(
+        scrollBehaviorConfig, scrollDampingRatio, scrollStiffness, 
+        showScrollButtons, autoHideButtons, scrollAmount
+    ) {
+        scrollBehaviorConfig ?: ScrollBehaviorPresets.customScroll(
+            dampingRatio = scrollDampingRatio,
+            stiffness = scrollStiffness,
+            showScrollButtons = showScrollButtons,
+            autoHideButtons = autoHideButtons
+        ).copy(
+            scrollConfig = ScrollConfig(
+                baseScrollAmount = scrollAmount,
+                physics = ConfigurableScrollPhysics(
+                    dampingRatio = scrollDampingRatio,
+                    stiffness = scrollStiffness
+                )
             )
         )
-    )
+    }
     
     // Use clean scroll behavior system
     when (orientation) {
@@ -218,7 +225,7 @@ private fun HorizontalListWithScroll(
 }
 
 /**
- * Clean vertical lazy column implementation
+ * Optimized vertical lazy column with reduced conditional branching
  */
 @Composable
 private fun VerticalLazyColumn(
@@ -231,40 +238,31 @@ private fun VerticalLazyColumn(
     gradientHeight: Dp = 0.dp,
     content: @Composable () -> Unit
 ) {
-    // Don't add gradient height to content padding - the gradient overlays on top
-    val adjustedPadding = PaddingValues(
-        start = contentPadding.calculateStartPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
-        end = contentPadding.calculateEndPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
-        top = contentPadding.calculateTopPadding(),
-        bottom = contentPadding.calculateBottomPadding()
-    )
-
-    if (snapFlingBehavior != null) {
-        LazyColumn(
-            state = listState,
-            modifier = modifier.fillMaxSize(),
-            contentPadding = adjustedPadding,
-            verticalArrangement = Arrangement.spacedBy(itemSpacing),
-            horizontalAlignment = horizontalAlignment,
-            flingBehavior = snapFlingBehavior
-        ) {
-            item { content() }
-        }
-    } else {
-        LazyColumn(
-            state = listState,
-            modifier = modifier.fillMaxSize(),
-            contentPadding = adjustedPadding,
-            verticalArrangement = Arrangement.spacedBy(itemSpacing),
-            horizontalAlignment = horizontalAlignment
-        ) {
-            item { content() }
-        }
+    // Optimize padding calculation with memoization
+    val adjustedPadding = remember(contentPadding) {
+        PaddingValues(
+            start = contentPadding.calculateStartPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
+            end = contentPadding.calculateEndPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
+            top = contentPadding.calculateTopPadding(),
+            bottom = contentPadding.calculateBottomPadding()
+        )
+    }
+    
+    // Single LazyColumn with conditional fling behavior for better performance
+    LazyColumn(
+        state = listState,
+        modifier = modifier.fillMaxSize(),
+        contentPadding = adjustedPadding,
+        verticalArrangement = Arrangement.spacedBy(itemSpacing),
+        horizontalAlignment = horizontalAlignment,
+        flingBehavior = snapFlingBehavior ?: androidx.compose.foundation.gestures.ScrollableDefaults.flingBehavior()
+    ) {
+        item { content() }
     }
 }
 
 /**
- * Clean horizontal lazy row implementation
+ * Optimized horizontal lazy row with reduced conditional branching
  */
 @Composable
 private fun HorizontalLazyRow(
@@ -276,26 +274,15 @@ private fun HorizontalLazyRow(
     snapFlingBehavior: androidx.compose.foundation.gestures.FlingBehavior? = null,
     content: @Composable () -> Unit
 ) {
-    if (snapFlingBehavior != null) {
-        LazyRow(
-            state = listState,
-            modifier = modifier.fillMaxSize(),
-            contentPadding = contentPadding,
-            horizontalArrangement = Arrangement.spacedBy(itemSpacing),
-            verticalAlignment = verticalAlignment,
-            flingBehavior = snapFlingBehavior
-        ) {
-            item { content() }
-        }
-    } else {
-        LazyRow(
-            state = listState,
-            modifier = modifier.fillMaxSize(),
-            contentPadding = contentPadding,
-            horizontalArrangement = Arrangement.spacedBy(itemSpacing),
-            verticalAlignment = verticalAlignment
-        ) {
-            item { content() }
-        }
+    // Single LazyRow with conditional fling behavior for better performance
+    LazyRow(
+        state = listState,
+        modifier = modifier.fillMaxSize(),
+        contentPadding = contentPadding,
+        horizontalArrangement = Arrangement.spacedBy(itemSpacing),
+        verticalAlignment = verticalAlignment,
+        flingBehavior = snapFlingBehavior ?: androidx.compose.foundation.gestures.ScrollableDefaults.flingBehavior()
+    ) {
+        item { content() }
     }
 }

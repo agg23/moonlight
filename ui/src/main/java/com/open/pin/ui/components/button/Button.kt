@@ -130,6 +130,11 @@ private object Precomputed {
         horizontal = PinDimensions.paddingHorizontalMedium,
         vertical = PinDimensions.paddingVerticalMedium
     )
+    
+    // Pre-calculate color combinations for different button styles
+    val AccentBaseColor = PinColors.tertiary
+    val DefaultBaseColor = Transparent
+    val LaserOffColor = LaserOff
 }
 
 
@@ -170,48 +175,58 @@ fun rememberButtonStyleData(
 
     val hoverProgress by interaction.animatedHoverProgress()
     
-    val containerColor by remember {
+    // Cache color calculations to reduce expensive operations
+    val containerColor by remember(style, enabled, effect.hoverFill) {
         derivedStateOf {
             when {
                 !enabled -> Precomputed.Transparent
                 else -> {
                     val baseColor = when (style) {
-                        ButtonStyle.Accent -> PinColors.tertiary
-                        else -> Precomputed.Transparent
+                        ButtonStyle.Accent -> Precomputed.AccentBaseColor
+                        else -> Precomputed.DefaultBaseColor
                     }
                     val hoverColor = when (effect.hoverFill) {
                         ButtonHoverFill.Full -> Precomputed.PrimaryButtonColor
                         ButtonHoverFill.Partial -> Precomputed.HoverPartialColor
                     }
-                    // Smooth interpolation instead of binary switching
-                    lerp(baseColor, hoverColor, hoverProgress)
+                    // Optimize interpolation with early exit for no-change cases
+                    if (hoverProgress == 0f) baseColor
+                    else if (hoverProgress == 1f) hoverColor
+                    else lerp(baseColor, hoverColor, hoverProgress)
                 }
             }
         }
     }
 
-    val contentColor by remember {
+    val contentColor by remember(enabled, effect.hoverFill) {
         derivedStateOf {
             when {
                 !enabled -> Precomputed.DisabledContentColor
                 effect.hoverFill == ButtonHoverFill.Full -> {
-                    // Smooth interpolation for full hover fill
-                    lerp(Precomputed.PrimaryButtonColor, LaserOff, hoverProgress)
+                    // Optimize interpolation with early exit conditions
+                    if (hoverProgress == 0f) Precomputed.PrimaryButtonColor
+                    else if (hoverProgress == 1f) Precomputed.LaserOffColor
+                    else lerp(Precomputed.PrimaryButtonColor, Precomputed.LaserOffColor, hoverProgress)
                 }
                 else -> Precomputed.PrimaryButtonColor
             }
         }
     }
 
-    val border = remember {
-        if (style == ButtonStyle.Borderless || borderStyle == ButtonBorderStyle.Dashed) null
-        else BorderStroke(
-            borderThickness,
-            if (enabled) when (style) {
-                ButtonStyle.Default, ButtonStyle.Borderless -> PinColors.primary
-                ButtonStyle.List, ButtonStyle.Accent -> PinColors.tertiary
-            } else Precomputed.DisabledContentColor
-        )
+    val border = remember(style, borderStyle, borderThickness, enabled) {
+        if (style == ButtonStyle.Borderless || borderStyle == ButtonBorderStyle.Dashed) {
+            null
+        } else {
+            val borderColor = if (enabled) {
+                when (style) {
+                    ButtonStyle.Default, ButtonStyle.Borderless -> PinColors.primary
+                    ButtonStyle.List, ButtonStyle.Accent -> PinColors.tertiary
+                }
+            } else {
+                Precomputed.DisabledContentColor
+            }
+            BorderStroke(borderThickness, borderColor)
+        }
     }
 
     val colors = when (style) {

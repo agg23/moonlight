@@ -138,12 +138,18 @@ fun PinUiDemo() {
 
 @Composable
 private fun MenuDemo() {
+    // Pre-computed button effect to avoid repeated allocations
     val buttonEffect = remember {
         ButtonEffect(
             enableMagnetic = true,
             enableSnap = true,
             snapWeight = 1.2f
         )
+    }
+    
+    // Pre-compute scroll configuration to avoid repeated object creation
+    val scrollConfig = remember {
+        ScrollBehaviorPresets.pinDefault()
     }
     
     ListView(
@@ -153,7 +159,7 @@ private fun MenuDemo() {
         itemSpacing = 16.dp,
         showScrollButtons = true,
         autoHideButtons = true,
-        scrollBehaviorConfig = ScrollBehaviorPresets.pinDefault()
+        scrollBehaviorConfig = scrollConfig
     ) {
         Column(
             horizontalAlignment = Alignment.Start,
