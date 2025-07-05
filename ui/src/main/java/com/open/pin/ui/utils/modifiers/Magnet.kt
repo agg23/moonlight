@@ -27,8 +27,8 @@ import androidx.compose.runtime.Composable
 @Composable
 fun Modifier.magneticEffect(
     enabled: Boolean = true,
-    maxOffset: Int = 6, // Reduced from 12dp to 6px for less aggressive movement
-    sensitivity: Float = 1.0f, // Balanced sensitivity with smoothing
+    maxOffset: Int = 18,
+    sensitivity: Float = 1.5f,
     elementId: String? = null,
     onHoverChanged: ((Boolean) -> Unit)? = null
 ) = composed {
