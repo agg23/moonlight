@@ -27,6 +27,7 @@ import com.open.pin.ui.utils.modifiers.magneticEffect
 import com.open.pin.ui.utils.modifiers.snappable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.DpSize
+import java.util.UUID
 
 
 /**
@@ -521,6 +522,6 @@ fun PinButtonSystemPreview() {
  * Generates a random ID for button elements.
  * Used to create unique identifiers for snapping behavior.
  * 
- * @return A random integer between 0 and 10000
+ * @return A random UUID as a string
  */
-private fun randomId() = (0..10000).random()
+private fun randomId() = UUID.randomUUID().toString()
