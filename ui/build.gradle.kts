@@ -51,6 +51,8 @@ dependencies {
     implementation(libs.androidx.animation.android)
     implementation(libs.androidx.lifecycle.viewmodel.android)
 
+    debugImplementation(libs.ui.tooling)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
