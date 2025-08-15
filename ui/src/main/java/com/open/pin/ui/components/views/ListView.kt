@@ -6,18 +6,20 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Text
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.open.pin.ui.debug.AiPinPreview
+import com.open.pin.ui.debug.PinPreviewView
 import com.open.pin.ui.scroll.ConfigurableScrollPhysics
 import com.open.pin.ui.scroll.ScrollBehavior
 import com.open.pin.ui.scroll.ScrollBehaviorConfig
 import com.open.pin.ui.scroll.ScrollBehaviorPresets
 import com.open.pin.ui.scroll.ScrollConfig
-import com.open.pin.ui.scroll.SimpleScrollBehavior
 import com.open.pin.ui.scroll.rememberScrollBehaviorState
 import com.open.pin.ui.theme.PinScrollDimensions
 
@@ -284,5 +286,17 @@ private fun HorizontalLazyRow(
         flingBehavior = snapFlingBehavior ?: androidx.compose.foundation.gestures.ScrollableDefaults.flingBehavior()
     ) {
         item { content() }
+    }
+}
+
+@AiPinPreview
+@Composable
+fun ListViewHorizontalPreview() {
+    PinPreviewView {
+        ListView(showScrollButtons = true, autoHideButtons = true) {
+            Column {
+                Text(" Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam gravida lectus in lacus rhoncus, id pretium ligula commodo. In congue nulla vel condimentum ullamcorper. Quisque eget augue et orci molestie hendrerit. Nulla orci orci, lacinia sed metus quis, vehicula scelerisque est. Fusce ultrices sapien sit amet quam consectetur, id tempus erat viverra. Nunc tempor maximus nulla eleifend sollicitudin. Pellentesque pharetra nisi quis pulvinar imperdiet. Etiam ullamcorper ex eget pretium rutrum. Vivamus consequat dolor felis, sit amet posuere sapien semper at. Nunc ligula dolor, tincidunt nec lorem id, suscipit cursus nulla. Nunc et fermentum enim. Ut lobortis velit metus, at placerat ligula posuere vitae. Nullam sit amet velit laoreet, eleifend purus ut, auctor sem. Integer sed justo porttitor eros fermentum ultricies ac vel leo")
+            }
+        }
     }
 }
