@@ -1,16 +1,24 @@
 package com.open.pin.ui.components.views
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.open.pin.ui.components.button.PinCircularButton
+import com.open.pin.ui.debug.AiPinPreview
+import com.open.pin.ui.debug.PinPreviewView
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -30,29 +38,37 @@ data class RadialViewParams(
     val startAngle: Float = 0f,
     val sweepAngle: Float = 360f,
     val rotateItems: Boolean = false,
-    val offsetY: Dp = 0.dp,
-    val offsetX: Dp = 0.dp,
+    val offsetY: Dp? = null,
+    val offsetX: Dp? = null,
     val padding: Dp = 0.dp
 )
 
 /**
  * Arranges composable items in a circular pattern around a center point.
  *
+ * @param modifier Modifier for the container
  * @param itemCount Number of items to arrange
  * @param params Configuration parameters for the radial layout
- * @param modifier Modifier for the container
  * @param itemContent Lambda providing composable content for each position
  */
 @Composable
 fun RadialView(
+    modifier: Modifier = Modifier,
     itemCount: Int,
     params: RadialViewParams = RadialViewParams(),
-    modifier: Modifier = Modifier,
     itemContent: @Composable (Int) -> Unit
 ) {
     Box(
-        modifier = modifier.padding(params.padding),
-        contentAlignment = Alignment.Center
+        modifier = modifier
+            .padding(params.padding)
+            .layout { measurable, constraints ->
+                val placeable = measurable.measure(constraints)
+                
+                layout(placeable.width, placeable.height) {
+                    // Place the Box at the center of available space
+                    placeable.placeRelative(0, 0)
+                }
+            }
     ) {
         if (itemCount <= 0) return@Box
         
@@ -64,23 +80,31 @@ fun RadialView(
                 startAngle = params.startAngle,
                 sweepAngle = params.sweepAngle
             )
-            
-            val x = (cos(angleInRadians) * params.radius.value).toInt()
-            val y = (sin(angleInRadians) * params.radius.value).toInt()
+
+            // Bizarrely the Dp operations have strict ordering, so I can't put the trig functions first
+            val x = params.radius * cos(angleInRadians) + (params.offsetX ?: 0.dp)
+            val y = params.radius * sin(angleInRadians) + (params.offsetY ?: 0.dp)
             
             // Calculate rotation if needed
             val rotation = if (params.rotateItems) {
                 Math.toDegrees(angleInRadians.toDouble()).toFloat() + 90f
             } else 0f
             
-            // Place the item
             Box(
                 modifier = Modifier
-                    .offset {
-                        IntOffset(
-                            x = x + params.offsetX.roundToPx(),
-                            y = y + params.offsetY.roundToPx()
-                        )
+                    .layout { measurable, constraints ->
+                        // Calculate position relative to center
+                        val placeable = measurable.measure(constraints)
+                        
+                        layout(placeable.width, placeable.height) {
+                            val centerX = constraints.maxWidth / 2
+                            val centerY = constraints.maxHeight / 2
+                            
+                            placeable.placeRelative(
+                                x = centerX + x.roundToPx() - placeable.width / 2,
+                                y = centerY + y.roundToPx() - placeable.height / 2
+                            )
+                        }
                     }
                     .rotate(rotation),
                 contentAlignment = Alignment.Center
@@ -114,23 +138,44 @@ private fun calculateAngleForItem(
 
 /**
  * Variant of RadialView that accepts direct composable content for convenience
- * 
- * @param params Configuration parameters for the radial layout
+ *
  * @param modifier Modifier for the container
- * @param content Variable argument list of composable content items to arrange radially
+ * @param params Configuration parameters for the radial layout
+ * @param list List of items to arrange
+ * @param itemContent Renderer for each item
  */
 @Composable
-fun RadialView(
-    params: RadialViewParams = RadialViewParams(),
+fun <T>RadialView(
     modifier: Modifier = Modifier,
-    vararg content: @Composable () -> Unit
+    params: RadialViewParams = RadialViewParams(),
+    list: List<T>,
+    itemContent: @Composable (T) -> Unit
 ) {
     RadialView(
-        itemCount = content.size,
+        modifier = modifier,
         params = params,
-        modifier = modifier
+        itemCount = list.size
     ) { index ->
-        content[index]()
+        itemContent(list[index])
     }
 }
 
+@AiPinPreview
+@Composable
+fun RadialViewPreview() {
+    val icons = listOf(
+        Icons.Default.Home,
+        Icons.Default.Email,
+        Icons.Default.Call,
+        Icons.Default.Notifications,
+        Icons.Default.Settings
+    )
+
+    PinPreviewView {
+        Box(Modifier.fillMaxSize()) {
+            RadialView(Modifier, RadialViewParams(), icons) { icon ->
+                PinCircularButton({}, icon = icon)
+            }
+        }
+    }
+}
