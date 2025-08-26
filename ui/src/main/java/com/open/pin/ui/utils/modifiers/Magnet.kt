@@ -59,7 +59,7 @@ fun Modifier.magneticEffect(
     }
     
     // Track globally active element for persistence
-    val isGloballyActive = interactionState.isSnapped
+    val isGloballyActive by interactionState.isSnappedState()
     
     // Reset magnetic state when this element is no longer globally active
     LaunchedEffect(isGloballyActive) {

@@ -328,7 +328,11 @@ fun PinButtonBase(
                 Modifier.magneticEffect(
                     enabled = true,
                     elementId = snapId
-                ) { interaction.isHovered = it }
+                ) { hovered -> 
+                    if (hovered || !interaction.isSnapped) {
+                        interaction.isHovered = hovered
+                    }
+                }
             } else Modifier
         )
         .then(
@@ -336,7 +340,10 @@ fun PinButtonBase(
                 Modifier.snappable(
                     id = snapId,
                     weight = effect.snapWeight,
-                    onSnap = { interaction.isSnapped = it }
+                    onSnap = { snapped ->
+                        interaction.isSnapped = snapped
+                        interaction.isHovered = snapped
+                    }
                 )
             } else Modifier
         )
