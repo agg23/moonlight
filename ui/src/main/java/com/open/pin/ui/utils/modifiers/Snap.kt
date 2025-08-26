@@ -26,18 +26,21 @@ data class SnappableElement(
  *               Values > 1 give this element a larger region of influence
  *               Values < 1 shrink this element's region of influence
  * @param onSnap Callback that fires when this element's snap state changes
+ * @param onActivate Callback that fires when this element is activated
  */
 @Composable
 fun Modifier.snappable(
     id: String = remember { "snappable-${java.util.UUID.randomUUID()}" },
     weight: Float = 1.0f,
-    onSnap: (Boolean) -> Unit = {}
+    onSnap: (Boolean) -> Unit = {},
+    onActivate: (() -> Unit)? = null
 ) = composed {
     // Use shared interaction element state
     val interactionState = rememberInteractionElementState(
         id = id,
         weight = weight,
-        enabled = true
+        enabled = true,
+        onActivate = onActivate
     )
     
     this.interactionElement(
