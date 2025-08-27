@@ -39,7 +39,7 @@ class InteractionElementState(
     val id: String,
     val weight: Float,
     val enabled: Boolean,
-    private val coordinator: SnapCoordinator,
+    val coordinator: SnapCoordinator,
     private val onActivate: (() -> Unit)? = null
 ) {
     // Element position and size tracking
