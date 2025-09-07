@@ -336,7 +336,8 @@ fun PinButtonBase(
                 Modifier.snappable(
                     id = snapId,
                     weight = effect.snapWeight,
-                    onSnap = { interaction.isSnapped = it }
+                    onSnap = { interaction.isSnapped = it },
+                    onActivate = onClick
                 )
             } else Modifier
         )

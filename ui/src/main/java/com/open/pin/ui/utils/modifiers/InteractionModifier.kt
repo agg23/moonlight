@@ -17,15 +17,17 @@ import androidx.compose.ui.unit.IntSize
 fun rememberInteractionElementState(
     id: String = remember { "element-${java.util.UUID.randomUUID()}" },
     weight: Float = 1.0f,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    onActivate: (() -> Unit)? = null
 ): InteractionElementState {
     val coordinator = rememberSnapCoordinator()
-    return remember(id, weight, enabled, coordinator) {
+    return remember(id, weight, enabled, coordinator, onActivate) {
         InteractionElementState(
             id = id,
             weight = weight,
             enabled = enabled,
-            coordinator = coordinator
+            coordinator = coordinator,
+            onActivate = onActivate
         )
     }
 }
@@ -37,7 +39,8 @@ class InteractionElementState(
     val id: String,
     val weight: Float,
     val enabled: Boolean,
-    private val coordinator: SnapCoordinator
+    private val coordinator: SnapCoordinator,
+    private val onActivate: (() -> Unit)? = null
 ) {
     // Element position and size tracking
     var elementSize by mutableStateOf(IntSize.Zero)
@@ -80,7 +83,7 @@ class InteractionElementState(
                 center = center,
                 weight = weight
             )
-            coordinator.registerElement(element)
+            coordinator.registerElement(element, onActivate)
         }
     }
     
