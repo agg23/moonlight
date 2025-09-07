@@ -23,6 +23,9 @@ class SnapCoordinator {
     private val _activeElementId = MutableStateFlow<String?>(null)
     val activeElementId = _activeElementId.asStateFlow()
     
+    // Element activation callbacks
+    private val _activationCallbacks = mutableMapOf<String, () -> Unit>()
+    
     // The last known cursor position
     private val _cursorPosition = MutableStateFlow(Offset.Zero)
     val cursorPosition = _cursorPosition.asStateFlow()
@@ -34,10 +37,11 @@ class SnapCoordinator {
     private val movementThreshold = 5f // Minimum movement to trigger update
     
     // Register a new snappable element
-    fun registerElement(element: SnappableElement) {
+    fun registerElement(element: SnappableElement, onActivate: (() -> Unit)? = null) {
         _elements.update { currentElements ->
             currentElements.filter { it.id != element.id } + element
         }
+        onActivate?.let { _activationCallbacks[element.id] = it }
         // Recalculate active element when a new element is registered
         updateVoronoiOwner(_cursorPosition.value)
     }
@@ -45,6 +49,7 @@ class SnapCoordinator {
     // Unregister an element (when it leaves composition)
     fun unregisterElement(id: String) {
         _elements.update { it.filter { element -> element.id != id } }
+        _activationCallbacks.remove(id)
         if (_activeElementId.value == id) {
             // If the active element is removed, find a new one
             updateVoronoiOwner(_cursorPosition.value)
@@ -60,6 +65,13 @@ class SnapCoordinator {
             
             val position = Offset(event.x, event.y)
             processPositionUpdate(position, forceUpdate = action == MotionEvent.ACTION_DOWN)
+        }
+        
+        if (action == MotionEvent.ACTION_DOWN) {
+            // Laser display only sends down events
+            _activeElementId.value?.let { activeId ->
+                _activationCallbacks[activeId]?.invoke()
+            }
         }
     }
     
