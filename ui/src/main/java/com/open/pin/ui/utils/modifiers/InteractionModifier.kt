@@ -64,8 +64,10 @@ class InteractionElementState(
         )
     
     // Snap state tracking
-    val isSnapped by derivedStateOf {
-        enabled && coordinator.activeElementId.value == id
+    @Composable
+    fun isSnappedState(): State<Boolean> {
+        val activeElementId by coordinator.activeElementId.collectAsState()
+        return derivedStateOf { enabled && activeElementId == id }
     }
     
     /**
@@ -105,8 +107,9 @@ fun Modifier.interactionElement(
     onSnapChanged: ((Boolean) -> Unit)? = null
 ) = composed {
     // Effect to notify of snap state changes
-    LaunchedEffect(state.isSnapped) {
-        onSnapChanged?.invoke(state.isSnapped)
+    val isSnappedState by state.isSnappedState()
+    LaunchedEffect(isSnappedState) {
+        onSnapChanged?.invoke(isSnappedState)
     }
     
     // Register/unregister with the coordinator
