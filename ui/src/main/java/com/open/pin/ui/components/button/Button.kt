@@ -343,7 +343,8 @@ fun PinButtonBase(
                     onSnap = { snapped ->
                         interaction.isSnapped = snapped
                         interaction.isHovered = snapped
-                    }
+                    },
+                    onActivate = onClick
                 )
             } else Modifier
         )
