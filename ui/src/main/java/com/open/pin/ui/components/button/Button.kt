@@ -351,9 +351,11 @@ fun PinButtonBase(
 
     val interactionSource = remember { MutableInteractionSource() }
 
+    val buttonOnClick = if (effect.enableSnap) { {} } else onClick
+
     when (style) {
         ButtonStyle.Borderless -> TextButton(
-            onClick = onClick, 
+            onClick = buttonOnClick,
             modifier = finalModifier, 
             enabled = enabled, 
             colors = styleData.colors, 
@@ -363,7 +365,7 @@ fun PinButtonBase(
             content = content
         )
         ButtonStyle.List -> OutlinedButton(
-            onClick = onClick, 
+            onClick = buttonOnClick,
             modifier = finalModifier, 
             enabled = enabled, 
             colors = styleData.colors,
@@ -381,7 +383,7 @@ fun PinButtonBase(
             content = content
         )
         else -> Button(
-            onClick = onClick, 
+            onClick = buttonOnClick,
             modifier = finalModifier, 
             enabled = enabled, 
             colors = styleData.colors,
