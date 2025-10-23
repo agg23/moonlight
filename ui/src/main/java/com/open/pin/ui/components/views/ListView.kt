@@ -3,6 +3,7 @@ package com.open.pin.ui.components.views
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -72,7 +73,7 @@ fun ListView(
     scrollStiffness: Float = androidx.compose.animation.core.Spring.StiffnessLow,
     scrollBehaviorConfig: ScrollBehaviorConfig? = null,
     listState: LazyListState = rememberLazyListState(),
-    content: @Composable () -> Unit
+    content: LazyListScope.() -> Unit
 ) {
     // Lazy initialization of snap behavior to avoid unnecessary object creation
     val snapFlingBehavior = if (enableSnapToCenter) {
@@ -152,7 +153,7 @@ private fun VerticalListWithScroll(
     snapFlingBehavior: androidx.compose.foundation.gestures.FlingBehavior?,
     listState: LazyListState,
     scrollConfig: ScrollBehaviorConfig,
-    content: @Composable () -> Unit
+    content: LazyListScope.() -> Unit
 ) {
     val contentPadding = PaddingValues(
         start = leftIndent,
@@ -205,7 +206,7 @@ private fun HorizontalListWithScroll(
     snapFlingBehavior: androidx.compose.foundation.gestures.FlingBehavior?,
     listState: LazyListState,
     scrollConfig: ScrollBehaviorConfig,
-    content: @Composable () -> Unit
+    content: LazyListScope.() -> Unit
 ) {
     val contentPadding = PaddingValues(
         start = leftIndent,
@@ -238,7 +239,7 @@ private fun VerticalLazyColumn(
     horizontalAlignment: Alignment.Horizontal,
     snapFlingBehavior: androidx.compose.foundation.gestures.FlingBehavior? = null,
     gradientHeight: Dp = 0.dp,
-    content: @Composable () -> Unit
+    content: LazyListScope.() -> Unit
 ) {
     // Optimize padding calculation with memoization
     val adjustedPadding = remember(contentPadding) {
@@ -259,7 +260,7 @@ private fun VerticalLazyColumn(
         horizontalAlignment = horizontalAlignment,
         flingBehavior = snapFlingBehavior ?: androidx.compose.foundation.gestures.ScrollableDefaults.flingBehavior()
     ) {
-        item { content() }
+        content()
     }
 }
 
@@ -274,7 +275,7 @@ private fun HorizontalLazyRow(
     itemSpacing: Dp,
     verticalAlignment: Alignment.Vertical,
     snapFlingBehavior: androidx.compose.foundation.gestures.FlingBehavior? = null,
-    content: @Composable () -> Unit
+    content: LazyListScope.() -> Unit
 ) {
     // Single LazyRow with conditional fling behavior for better performance
     LazyRow(
@@ -285,7 +286,7 @@ private fun HorizontalLazyRow(
         verticalAlignment = verticalAlignment,
         flingBehavior = snapFlingBehavior ?: androidx.compose.foundation.gestures.ScrollableDefaults.flingBehavior()
     ) {
-        item { content() }
+        content()
     }
 }
 
@@ -294,7 +295,7 @@ private fun HorizontalLazyRow(
 fun ListViewHorizontalPreview() {
     PinPreviewView {
         ListView(showScrollButtons = true, autoHideButtons = true) {
-            Column {
+            item {
                 Text(" Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam gravida lectus in lacus rhoncus, id pretium ligula commodo. In congue nulla vel condimentum ullamcorper. Quisque eget augue et orci molestie hendrerit. Nulla orci orci, lacinia sed metus quis, vehicula scelerisque est. Fusce ultrices sapien sit amet quam consectetur, id tempus erat viverra. Nunc tempor maximus nulla eleifend sollicitudin. Pellentesque pharetra nisi quis pulvinar imperdiet. Etiam ullamcorper ex eget pretium rutrum. Vivamus consequat dolor felis, sit amet posuere sapien semper at. Nunc ligula dolor, tincidunt nec lorem id, suscipit cursus nulla. Nunc et fermentum enim. Ut lobortis velit metus, at placerat ligula posuere vitae. Nullam sit amet velit laoreet, eleifend purus ut, auctor sem. Integer sed justo porttitor eros fermentum ultricies ac vel leo")
             }
         }
