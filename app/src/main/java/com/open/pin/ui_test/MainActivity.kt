@@ -105,7 +105,7 @@ fun FullScreenContent() {
             .background(color = PinTheme.colors.background)
     ) {
         // Main UI content
-        PinUiDemo()
+//        PinUiDemo()
         
         // Debug dot - small circle in top right corner
         Box(
@@ -130,117 +130,117 @@ fun FullScreenContent() {
     }
 }
 
-@Composable
-fun PinUiDemo() {
-    // Simple settings demo with just the buttons we want to test
-    MenuDemo()
-}
-
-@Composable
-private fun MenuDemo() {
-    // Pre-computed button effect to avoid repeated allocations
-    val buttonEffect = remember {
-        ButtonEffect(
-            enableMagnetic = true,
-            enableSnap = true,
-            snapWeight = 1.2f
-        )
-    }
-    
-    // Pre-compute scroll configuration to avoid repeated object creation
-    val scrollConfig = remember {
-        ScrollBehaviorPresets.pinDefault()
-    }
-    
-    ListView(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        leftIndent = 0.dp,      // No ListView indents
-        rightIndent = 0.dp,
-        itemSpacing = 16.dp,
-        showScrollButtons = true,
-        autoHideButtons = true,
-        scrollBehaviorConfig = scrollConfig
-    ) {
-        Column(
-            horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            ViewHeading(title = "Demo", centered = false)  // Edge-to-edge heading
-            
-            Column(
-                modifier = Modifier.padding(
-                    start = 12.dp,    // Manual indent for buttons only
-                    end = 36.dp       // Space for scroll button
-                ),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                PinButton(
-                    text = "Item1",
-                    onClick = { /* Handle click */ },
-                    style = ButtonStyle.List,
-                    effect = buttonEffect
-                )
-                
-                PinButton(
-                    text = "Item2",
-                    onClick = { /* Handle click */ },
-                    style = ButtonStyle.List,
-                    effect = buttonEffect
-                )
-                
-                PinButton(
-                    text = "Item3",
-                    onClick = { /* Handle click */ },
-                    style = ButtonStyle.List,
-                    effect = buttonEffect
-                )
-
-                PinButton(
-                    text = "Item4",
-                    onClick = { /* Handle click */ },
-                    style = ButtonStyle.List,
-                    effect = buttonEffect
-                )
-
-                PinButton(
-                    text = "Item5",
-                    onClick = { /* Handle click */ },
-                    style = ButtonStyle.List,
-                    effect = buttonEffect
-                )
-
-                PinButton(
-                    text = "Item6",
-                    onClick = { /* Handle click */ },
-                    style = ButtonStyle.List,
-                    effect = buttonEffect
-                )
-
-                PinButton(
-                    text = "Item7",
-                    onClick = { /* Handle click */ },
-                    style = ButtonStyle.List,
-                    effect = buttonEffect
-                )
-
-                PinButton(
-                    text = "Item8",
-                    onClick = { /* Handle click */ },
-                    style = ButtonStyle.List,
-                    effect = buttonEffect
-                )
-
-                PinButton(
-                    text = "Item9",
-                    onClick = { /* Handle click */ },
-                    style = ButtonStyle.List,
-                    effect = buttonEffect
-                )
-            }
-        }
-    }
-}
+//@Composable
+//fun PinUiDemo() {
+//    // Simple settings demo with just the buttons we want to test
+//    MenuDemo()
+//}
+//
+//@Composable
+//private fun MenuDemo() {
+//    // Pre-computed button effect to avoid repeated allocations
+//    val buttonEffect = remember {
+//        ButtonEffect(
+//            enableMagnetic = true,
+//            enableSnap = true,
+//            snapWeight = 1.2f
+//        )
+//    }
+//
+//    // Pre-compute scroll configuration to avoid repeated object creation
+//    val scrollConfig = remember {
+//        ScrollBehaviorPresets.pinDefault()
+//    }
+//
+//    ListView(
+//        horizontalAlignment = Alignment.CenterHorizontally,
+//        leftIndent = 0.dp,      // No ListView indents
+//        rightIndent = 0.dp,
+//        itemSpacing = 16.dp,
+//        showScrollButtons = true,
+//        autoHideButtons = true,
+//        scrollBehaviorConfig = scrollConfig
+//    ) {
+//        Column(
+//            horizontalAlignment = Alignment.Start,
+//            verticalArrangement = Arrangement.spacedBy(12.dp)
+//        ) {
+//            ViewHeading(title = "Demo", centered = false)  // Edge-to-edge heading
+//
+//            Column(
+//                modifier = Modifier.padding(
+//                    start = 12.dp,    // Manual indent for buttons only
+//                    end = 36.dp       // Space for scroll button
+//                ),
+//                horizontalAlignment = Alignment.CenterHorizontally,
+//                verticalArrangement = Arrangement.spacedBy(16.dp)
+//            ) {
+//                PinButton(
+//                    text = "Item1",
+//                    onClick = { /* Handle click */ },
+//                    style = ButtonStyle.List,
+//                    effect = buttonEffect
+//                )
+//
+//                PinButton(
+//                    text = "Item2",
+//                    onClick = { /* Handle click */ },
+//                    style = ButtonStyle.List,
+//                    effect = buttonEffect
+//                )
+//
+//                PinButton(
+//                    text = "Item3",
+//                    onClick = { /* Handle click */ },
+//                    style = ButtonStyle.List,
+//                    effect = buttonEffect
+//                )
+//
+//                PinButton(
+//                    text = "Item4",
+//                    onClick = { /* Handle click */ },
+//                    style = ButtonStyle.List,
+//                    effect = buttonEffect
+//                )
+//
+//                PinButton(
+//                    text = "Item5",
+//                    onClick = { /* Handle click */ },
+//                    style = ButtonStyle.List,
+//                    effect = buttonEffect
+//                )
+//
+//                PinButton(
+//                    text = "Item6",
+//                    onClick = { /* Handle click */ },
+//                    style = ButtonStyle.List,
+//                    effect = buttonEffect
+//                )
+//
+//                PinButton(
+//                    text = "Item7",
+//                    onClick = { /* Handle click */ },
+//                    style = ButtonStyle.List,
+//                    effect = buttonEffect
+//                )
+//
+//                PinButton(
+//                    text = "Item8",
+//                    onClick = { /* Handle click */ },
+//                    style = ButtonStyle.List,
+//                    effect = buttonEffect
+//                )
+//
+//                PinButton(
+//                    text = "Item9",
+//                    onClick = { /* Handle click */ },
+//                    style = ButtonStyle.List,
+//                    effect = buttonEffect
+//                )
+//            }
+//        }
+//    }
+//}
 
 @Composable
 private fun ViewHeading(modifier: Modifier = Modifier, title: String, centered: Boolean = false) {
